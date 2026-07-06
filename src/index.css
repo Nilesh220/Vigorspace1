@@ -3747,4 +3747,386 @@ img {
 }
 
 
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE NAVIGATION — TOP BAR, DRAWER, BOTTOM NAV
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Hide mobile nav on desktop */
+.mobile-topbar,
+.mobile-drawer-overlay,
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* ── Mobile top bar ──────────────────────────── */
+.mobile-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--dark);
+  border-bottom: 1px dashed rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 100;
+}
+
+.mobile-menu-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Full-screen drawer ───────────────────────── */
+.mobile-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+
+.mobile-drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 78vw;
+  max-width: 300px;
+  height: 100%;
+  background: var(--dark);
+  border-right: 1px dashed rgba(255,255,255,0.15);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
+  animation: slideInLeft 0.25s ease;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px dashed rgba(255,255,255,0.12);
+  margin-bottom: 12px;
+}
+
+.mobile-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px;
+  overflow-y: auto;
+}
+
+.mobile-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.mobile-drawer-item:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.mobile-drawer-item.active {
+  color: var(--yellow);
+  background: rgba(245,200,66,0.08);
+}
+
+/* ── Bottom navigation bar ───────────────────── */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--dark);
+  border-top: 1px dashed rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-bottom-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 6px 16px;
+  transition: color 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mobile-bottom-item.active {
+  color: var(--yellow);
+}
+
+.mobile-bottom-item svg {
+  transition: transform 0.15s;
+}
+
+.mobile-bottom-item.active svg {
+  transform: scale(1.15);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   FULL MOBILE RESPONSIVE OVERRIDES
+   Breakpoint: 768px and below
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* Show mobile nav, hide desktop sidebar */
+  .sidebar { display: none !important; }
+  .mobile-topbar { display: flex; }
+  .mobile-bottom-nav { display: flex; }
+
+  /* Main content: remove sidebar margin, add top + bottom padding */
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: 56px;
+    padding-bottom: 80px;
+  }
+
+  /* Topbar: reposition for mobile (it sits below mobile-topbar) */
+  .topbar {
+    left: 0 !important;
+    top: 56px !important;
+    padding: 10px 16px;
+  }
+
+  /* Container padding */
+  .container { padding: 0 20px; }
+
+  /* Section padding */
+  .section-pink,
+  .section-dark,
+  .section-white,
+  .section-off-white { padding: 60px 0; }
+
+  /* ── HERO ────────────────────────────────────── */
+  .hero-section {
+    min-height: auto;
+    padding: 48px 20px 60px;
+  }
+
+  .hero-inner {
+    min-height: auto;
+    padding: 0;
+  }
+
+  .hero-title {
+    font-size: clamp(2.4rem, 12vw, 4rem);
+  }
+
+  /* Shrink stickers on mobile */
+  .sticker-heart    { width: 60px !important; top: 10% !important; left: 2% !important; }
+  .sticker-hand     { width: 75px !important; bottom: 8% !important; left: 2% !important; }
+  .sticker-rocket   { width: 75px !important; bottom: 8% !important; right: 2% !important; }
+  .sticker-lightning{ width: 55px !important; top: 8% !important; right: 2% !important; }
+
+  /* ── ABOUT SECTION ───────────────────────────── */
+  .about-section {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .about-content { min-width: unset; }
+
+  .about-image-frame {
+    width: 100%;
+    height: 260px;
+  }
+
+  /* ── HOW IT WORKS ────────────────────────────── */
+  .hiw-steps {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  .hiw-step { width: 100% !important; }
+
+  /* ── REWARDS SCATTERED ───────────────────────── */
+  .rewards-scattered-section {
+    min-height: auto !important;
+    padding: 40px 16px !important;
+  }
+
+  .rs-card {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  /* Re-stack brand cards on mobile */
+  .rs-card:nth-child(1) { top: -110px !important; left: -50px !important; }
+  .rs-card:nth-child(2) { top: -110px !important; right: -50px !important; left: auto !important; }
+  .rs-card:nth-child(3) { left: -100px !important; top: 0 !important; }
+  .rs-card:nth-child(4) { right: -100px !important; left: auto !important; top: 0 !important; }
+  .rs-card:nth-child(5) { bottom: -110px !important; left: -50px !important; top: auto !important; }
+  .rs-card:nth-child(6) { bottom: -110px !important; right: -50px !important; left: auto !important; top: auto !important; }
+
+  .rs-center { max-width: 260px !important; }
+
+  /* ── EVENTS SECTION ──────────────────────────── */
+  .events-cards-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 20px !important;
+  }
+
+  .event-card {
+    width: 100% !important;
+    max-width: 360px !important;
+  }
+
+  /* ── SOCIAL FEED ─────────────────────────────── */
+  .social-feed-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 20px !important;
+  }
+
+  /* ── FAQ ─────────────────────────────────────── */
+  .faq-section { padding: 40px 0 !important; }
+
+  /* ── CONTACT PAGE ────────────────────────────── */
+  .contact-body {
+    flex-direction: column;
+    padding: 20px 20px 80px;
+    gap: 32px;
+  }
+
+  .contact-sticker {
+    display: none;
+  }
+
+  .contact-right {
+    padding: 24px 20px;
+  }
+
+  /* ── FOOTER ──────────────────────────────────── */
+  .footer-grid {
+    flex-direction: column !important;
+    gap: 32px !important;
+  }
+
+  /* ── AUTH PAGES ──────────────────────────────── */
+  .auth-page { flex-direction: column; }
+  .auth-brand-panel {
+    width: 100% !important;
+    padding: 32px 24px !important;
+    min-height: 200px !important;
+  }
+  .auth-form-panel { padding: 28px 20px !important; }
+
+  /* ── PROFILE / LEADERBOARD / EARN ───────────── */
+  .profile-header {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 16px !important;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .earn-tasks-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .leaderboard-table-wrap {
+    overflow-x: auto;
+  }
+
+  /* ── SECTION TITLES ──────────────────────────── */
+  .section-title {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  .section-subtitle { font-size: 1.2rem; }
+
+  /* ── REWARDS PAGE ────────────────────────────── */
+  .rewards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  /* ── REFER PAGE ──────────────────────────────── */
+  .refer-hero { padding: 40px 20px !important; }
+  .refer-steps { flex-direction: column !important; }
+
+  /* ── GENERIC ──────────────────────────────────── */
+  .two-col-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  h1, h2, h3 { word-break: break-word; }
+}
+
+/* ── Tablet: 769–1024px ─────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  :root { --sidebar-width: 110px; }
+
+  .sidebar-nav-item span { font-size: 0.72rem; }
+
+  .hero-title { font-size: clamp(3rem, 7vw, 5rem); }
+
+  .about-image-frame { width: 300px; height: 340px; }
+
+  .rewards-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .events-cards-row {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .event-card { width: 280px !important; }
+}
+
+/* ── Extra small phones ─────────────────────── */
+@media (max-width: 380px) {
+
+  .hero-title { font-size: clamp(2rem, 13vw, 3rem); }
+
+  .rewards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-bottom-item { padding: 6px 10px; font-size: 0.6rem; }
+}
+
+
+
 
