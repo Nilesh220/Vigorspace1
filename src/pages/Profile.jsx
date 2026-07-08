@@ -312,9 +312,13 @@ export default function Profile() {
                     {/* Right Part: QR/Barcode Stub */}
                     <div className="ticket-details-stub">
                       <div className="ticket-stub-barcode-container">
-                        {/* CSS barcode simulation lines */}
-                        <div className="barcode-sim" />
-                        <div className="barcode-num font-mono">{b.id.substring(b.id.length - 8).toUpperCase()}</div>
+                        {/* Real dynamic scannable QR Code */}
+                        <img 
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${b.id}&color=e8576d&bgcolor=2a1b3d`} 
+                          alt="QR Code Ticket" 
+                          style={{ width: 65, height: 65, borderRadius: 8, border: '1.5px solid rgba(232, 87, 109, 0.3)' }}
+                        />
+                        <div className="barcode-num font-mono" style={{ marginTop: 4 }}>{b.id.substring(b.id.length - 8).toUpperCase()}</div>
                       </div>
                       <div className="ticket-stub-squad-logo font-bungee">VS</div>
                     </div>

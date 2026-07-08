@@ -52,21 +52,206 @@ function TaskCard({ task, onKnowMore }) {
   );
 }
 
-function ScratchCard() {
+import { useRef } from 'react';
+import { useToast } from '../context/ToastContext';
+
+function ScratchCard({ user, profile, refetchProfile }) {
+  const canvasRef = useRef(null);
+  const { showToast, triggerConfetti } = useToast();
   const [revealed, setRevealed] = useState(false);
+  const [hasCheckedToday, setHasCheckedToday] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const isDrawing = useRef(false);
+
+  // Initialize Canvas
+  useEffect(() => {
+    if (revealed || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = 300;
+    const h = canvas.height = 160;
+
+    // Draw grey textured cover
+    ctx.fillStyle = '#555555';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw metallic dots
+    ctx.fillStyle = '#666666';
+    for (let i = 0; i < 200; i++) {
+      ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+    }
+    ctx.fillStyle = '#F5C842';
+    for (let i = 0; i < 25; i++) {
+      ctx.fillRect(Math.random() * w, Math.random() * h, 3, 3);
+    }
+
+    // Write text
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '800 14px "Bungee", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SWIPE TO SCRATCH!', w / 2, h / 2);
+  }, [revealed]);
+
+  // Synthesis double chime sound
+  function playSuccessSound() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const audioCtx = new AudioContext();
+      const playNote = (freq, time, dur) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0.08, time);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(time);
+        osc.stop(time + dur);
+      };
+      playNote(523.25, audioCtx.currentTime, 0.15); // C5
+      playNote(659.25, audioCtx.currentTime + 0.1, 0.3); // E5
+    } catch (e) {
+      console.warn('Web Audio API not supported/active: ', e);
+    }
+  }
+
+  async function handleAwardPoints() {
+    if (!user || loading) return;
+    setLoading(true);
+    try {
+      const { error: txnErr } = await supabase
+        .from('point_transactions')
+        .insert({
+          user_id: user.id,
+          delta: 25,
+          reason: 'scratch_win',
+        });
+
+      if (!txnErr) {
+        const currentPoints = profile?.total_points || 0;
+        await supabase
+          .from('profiles')
+          .update({ total_points: currentPoints + 25 })
+          .eq('id', user.id);
+
+        if (refetchProfile) await refetchProfile();
+        
+        playSuccessSound();
+        triggerConfetti();
+        showToast('🎉 Scratch Card Success! +25 Points added.', 'success');
+      } else {
+        showToast(txnErr.message, 'error');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  }
+
+  // Draw clear path
+  function getCoordinates(e) {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+  }
+
+  function handleDrawStart(e) {
+    if (!user) {
+      showToast('Please log in first to scratch cards!', 'error');
+      return;
+    }
+    isDrawing.current = true;
+    handleDraw(e);
+  }
+
+  function handleDraw(e) {
+    if (!isDrawing.current || !canvasRef.current) return;
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const { x, y } = getCoordinates(e);
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.fill();
+
+    checkPercentCleared();
+  }
+
+  function handleDrawEnd() {
+    isDrawing.current = false;
+  }
+
+  function checkPercentCleared() {
+    if (revealed || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+    let transparent = 0;
+
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] === 0) transparent++;
+    }
+
+    const percent = transparent / (canvas.width * canvas.height);
+    if (percent > 0.48) {
+      setRevealed(true);
+      handleAwardPoints();
+    }
+  }
+
   return (
-    <div className="earn-card">
-      <div
-        className="scratch-card"
-        onClick={() => setRevealed(true)}
-        style={{ cursor: 'pointer', userSelect: 'none' }}
+    <div className="earn-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div 
+        className="scratch-card-canvas-container" 
+        style={{
+          position: 'relative',
+          width: 300,
+          height: 160,
+          background: '#0c0c1b',
+          borderRadius: 12,
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '2px solid rgba(255, 255, 255, 0.1)'
+        }}
       >
-        {revealed ? (
-          <span className="scratch-card-text font-bungee" style={{ color: '#F5C842' }}>
-            🎉 +25 BONUS PTS!
-          </span>
-        ) : (
-          <span className="scratch-card-text font-bungee">SCRATCH TO REVEAL!</span>
+        {/* Hidden prize text */}
+        <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
+          <div className="font-bungee" style={{ color: '#F5C842', fontSize: '1.2rem', marginBottom: 4 }}>🎉 +25 POINTS!</div>
+          <div style={{ color: '#fff', fontSize: '0.75rem', opacity: 0.8 }}>BONUS CREDITED</div>
+        </div>
+
+        {/* Canvas overlay */}
+        {!revealed && (
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              cursor: 'crosshair',
+              touchAction: 'none'
+            }}
+            onMouseDown={handleDrawStart}
+            onMouseMove={handleDraw}
+            onMouseUp={handleDrawEnd}
+            onMouseLeave={handleDrawEnd}
+            onTouchStart={handleDrawStart}
+            onTouchMove={handleDraw}
+            onTouchEnd={handleDrawEnd}
+          />
         )}
       </div>
     </div>
@@ -75,7 +260,7 @@ function ScratchCard() {
 
 export default function Earn() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile, refetchProfile } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -136,7 +321,7 @@ export default function Earn() {
             )}
 
             {/* Scratch card always shown */}
-            <ScratchCard />
+            <ScratchCard user={user} profile={profile} refetchProfile={refetchProfile} />
           </div>
         )}
       </div>

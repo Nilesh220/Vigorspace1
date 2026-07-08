@@ -11,6 +11,7 @@ import AdminRedemptions from './pages/AdminRedemptions';
 import AdminMessages from './pages/AdminMessages';
 import AdminEvents from './pages/AdminEvents';
 import AdminStories from './pages/AdminStories';
+import AdminBookings from './pages/AdminBookings';
 
 export default function AdminApp() {
   const [checking, setChecking] = useState(true);
@@ -61,6 +62,7 @@ export default function AdminApp() {
         <Route path="redemptions" element={<AdminRedemptions />} />
         <Route path="events" element={<AdminEvents />} />
         <Route path="stories" element={<AdminStories />} />
+        <Route path="bookings" element={<AdminBookings />} />
         <Route path="messages" element={<AdminMessages />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>

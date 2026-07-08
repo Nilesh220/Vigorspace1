@@ -19,42 +19,45 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import NotFound from './pages/NotFound';
 import AdminApp from './admin/AdminApp';
+import { ToastProvider } from './context/ToastContext';
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public auth routes (no sidebar) */}
-          <Route path="/login"  element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public auth routes (no sidebar) */}
+            <Route path="/login"  element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
 
-          {/* Admin portal — own layout, own auth guard */}
-          <Route path="/admin/*" element={<AdminApp />} />
+            {/* Admin portal — own layout, own auth guard */}
+            <Route path="/admin/*" element={<AdminApp />} />
 
-          {/* App shell routes */}
-          <Route element={<AppShell />}>
-            {/* Public pages */}
-            <Route path="/"        element={<Home />} />
-            <Route path="/events"  element={<Events />} />
-            <Route path="/contact" element={<Contact />} />
+            {/* App shell routes */}
+            <Route element={<AppShell />}>
+              {/* Public pages */}
+              <Route path="/"        element={<Home />} />
+              <Route path="/events"  element={<Events />} />
+              <Route path="/contact" element={<Contact />} />
 
-            {/* Protected pages */}
-            <Route path="/earn"         element={<ProtectedRoute><Earn /></ProtectedRoute>} />
-            <Route path="/task/:id"     element={<ProtectedRoute><TaskDetails /></ProtectedRoute>} />
-            <Route path="/rewards"      element={<ProtectedRoute><Rewards /></ProtectedRoute>} />
-            <Route path="/refer"        element={<ProtectedRoute><Refer /></ProtectedRoute>} />
-            <Route path="/leaderboard"  element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
-            <Route path="/profile"      element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/stories"      element={<ProtectedRoute><Stories /></ProtectedRoute>} />
-            <Route path="/news"         element={<ProtectedRoute><News /></ProtectedRoute>} />
-            <Route path="/community"    element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
-            <Route path="/settings"     element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          </Route>
+              {/* Protected pages */}
+              <Route path="/earn"         element={<ProtectedRoute><Earn /></ProtectedRoute>} />
+              <Route path="/task/:id"     element={<ProtectedRoute><TaskDetails /></ProtectedRoute>} />
+              <Route path="/rewards"      element={<ProtectedRoute><Rewards /></ProtectedRoute>} />
+              <Route path="/refer"        element={<ProtectedRoute><Refer /></ProtectedRoute>} />
+              <Route path="/leaderboard"  element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+              <Route path="/profile"      element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/stories"      element={<ProtectedRoute><Stories /></ProtectedRoute>} />
+              <Route path="/news"         element={<ProtectedRoute><News /></ProtectedRoute>} />
+              <Route path="/community"    element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
+              <Route path="/settings"     element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

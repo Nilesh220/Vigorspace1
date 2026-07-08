@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, ClipboardList, CheckSquare, Gift, ShoppingBag, MessageSquare, LogOut, Menu, X, Calendar, Tv } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, CheckSquare, Gift, ShoppingBag, MessageSquare, LogOut, Menu, X, Calendar, Tv, Ticket } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import vigorLogo from '../assets/Group.png';
 
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/admin/redemptions',  label: 'Redemptions',  icon: ShoppingBag },
   { to: '/admin/events',       label: 'Events',       icon: Calendar },
   { to: '/admin/stories',      label: 'Stories',      icon: Tv },
+  { to: '/admin/bookings',     label: 'Bookings',     icon: Ticket },
   { to: '/admin/messages',     label: 'Messages',     icon: MessageSquare },
 ];
 
