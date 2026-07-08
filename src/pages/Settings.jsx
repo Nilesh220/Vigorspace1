@@ -7,12 +7,15 @@ import Footer from '../components/layout/Footer';
 const AVATARS = [
   'Amy', 'Robert', 'Molly', 'Harley', 'Scoot', 'Buster', 'Princess', 'Cuddles',
 ];
+import { useToast } from '../context/ToastContext';
 
 export default function Settings() {
   const { user, profile, refreshProfile } = useAuth();
+  const { showToast } = useToast();
   
   const [fullName, setFullName] = useState('');
   const [avatarSeed, setAvatarSeed] = useState('default');
+  const [streakReminders, setStreakReminders] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -20,13 +23,34 @@ export default function Settings() {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
-      // Try to extract seed from API url if possible, otherwise use a fallback
+      setStreakReminders(profile.streak_reminders_enabled || false);
       if (profile.avatar_url && profile.avatar_url.includes('seed=')) {
         const seed = decodeURIComponent(profile.avatar_url.split('seed=')[1]);
         setAvatarSeed(seed);
       }
     }
   }, [profile]);
+
+  async function handleToggleReminders(checked) {
+    setStreakReminders(checked);
+    if (!user) return;
+    const { error: updateErr } = await supabase
+      .from('profiles')
+      .update({ streak_reminders_enabled: checked })
+      .eq('id', user.id);
+
+    if (updateErr) {
+      showToast(updateErr.message, 'error');
+    } else {
+      showToast(
+        checked 
+          ? '🔔 Streak email reminders enabled!' 
+          : '🔕 Streak email reminders disabled.', 
+        'success'
+      );
+      if (refreshProfile) await refreshProfile();
+    }
+  }
 
   async function handleSave(e) {
     e.preventDefault();
@@ -151,6 +175,18 @@ export default function Settings() {
               NOTIFICATIONS
             </h3>
             <div className="settings-preferences-list">
+              <div className="preference-item">
+                <div>
+                  <div className="preference-title">Daily Streak Email Reminders</div>
+                  <div className="preference-desc">Email me when I haven't claimed my daily login streak rewards.</div>
+                </div>
+                <input 
+                  type="checkbox" 
+                  checked={streakReminders} 
+                  onChange={e => handleToggleReminders(e.target.checked)} 
+                />
+              </div>
+
               <div className="preference-item">
                 <div>
                   <div className="preference-title">Email Task Digests</div>
