@@ -4189,6 +4189,7 @@ img {
   .desktop-only-topbar  { display: none !important; }
   .mob-topbar           { display: flex; }
   .mob-bottom-nav       { display: flex; }
+  .mob-drawer-overlay   { display: block; }
 
   /* Main content shifts: top = mob-topbar height, bottom = bottom-nav height */
   .main-content {
