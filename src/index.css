@@ -796,12 +796,13 @@ img {
 
 .community-circle {
   position: absolute;
-  right: -10%;
-  top: 10%;
-  width: 60vw;
-  height: 60vw;
-  max-width: 700px;
-  max-height: 700px;
+  right: -8%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 55vw;
+  height: 55vw;
+  max-width: 620px;
+  max-height: 620px;
   background: var(--pink);
   border-radius: 50%;
   z-index: 0;
@@ -812,12 +813,15 @@ img {
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 60px;
+  justify-content: space-between;
+  gap: 0;
   flex-wrap: wrap;
 }
 
 .community-text {
-  max-width: 380px;
+  max-width: 420px;
+  flex: 1;
+  min-width: 260px;
 }
 
 .community-text p {
@@ -847,13 +851,18 @@ img {
 }
 
 .whatsapp-preview {
-  width: 280px;
+  width: 300px;
+  flex-shrink: 0;
   background: #fff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.35);
   position: relative;
-  z-index: 2;
+  z-index: 3;
+  /* Push card into the pink circle */
+  margin-left: auto;
+  margin-right: 2%;
+  transform: translateX(0);
 }
 
 .whatsapp-header {
