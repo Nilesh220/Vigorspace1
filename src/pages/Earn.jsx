@@ -63,6 +63,32 @@ function ScratchCard({ user, profile, refetchProfile }) {
   const [loading, setLoading] = useState(false);
   const isDrawing = useRef(false);
 
+  // Check if user has already scratched today
+  useEffect(() => {
+    async function checkScratchHistory() {
+      if (!user) return;
+      try {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { data, error } = await supabase
+          .from('point_transactions')
+          .select('delta')
+          .eq('user_id', user.id)
+          .eq('reason', 'scratch_win')
+          .gte('created_at', todayStr + 'T00:00:00')
+          .lte('created_at', todayStr + 'T23:59:59')
+          .maybeSingle();
+
+        if (data) {
+          setRevealed(true);
+          setPrizePts(data.delta);
+        }
+      } catch (err) {
+        console.error('Error checking scratch history:', err);
+      }
+    }
+    checkScratchHistory();
+  }, [user]);
+
   // Initialize Canvas
   useEffect(() => {
     if (revealed || !canvasRef.current) return;
@@ -120,14 +146,9 @@ function ScratchCard({ user, profile, refetchProfile }) {
 
   async function handleAwardPoints(awardedPoints) {
     if (!user || loading) return;
-
-    if (awardedPoints === 0) {
-      showToast('🍀 Better luck next time! Try again tomorrow.', 'error');
-      return;
-    }
-
     setLoading(true);
     try {
+      // 1. Insert point transaction (we insert even 0-point outcomes so they cannot scratch again)
       const { error: txnErr } = await supabase
         .from('point_transactions')
         .insert({
@@ -137,17 +158,23 @@ function ScratchCard({ user, profile, refetchProfile }) {
         });
 
       if (!txnErr) {
-        const currentPoints = profile?.total_points || 0;
-        await supabase
-          .from('profiles')
-          .update({ total_points: currentPoints + awardedPoints })
-          .eq('id', user.id);
+        if (awardedPoints > 0) {
+          const currentPoints = profile?.total_points || 0;
+          
+          // 2. Update user profile totals
+          await supabase
+            .from('profiles')
+            .update({ total_points: currentPoints + awardedPoints })
+            .eq('id', user.id);
 
-        if (refetchProfile) await refetchProfile();
-        
-        playSuccessSound();
-        triggerConfetti();
-        showToast(`🎉 Scratch Card Success! +${awardedPoints} Points added.`, 'success');
+          if (refetchProfile) await refetchProfile();
+          
+          playSuccessSound();
+          triggerConfetti();
+          showToast(`🎉 Scratch Card Success! +${awardedPoints} Points added.`, 'success');
+        } else {
+          showToast('🍀 Better luck next time! Try again tomorrow.', 'error');
+        }
       } else {
         showToast(txnErr.message, 'error');
       }
@@ -221,10 +248,7 @@ function ScratchCard({ user, profile, refetchProfile }) {
     const percent = transparent / (canvas.width * canvas.height);
     if (percent > 0.48) {
       setRevealed(true);
-      // Wait for state to catch up if needed, or pass current points value directly
-      const rand = Math.random();
-      const points = prizePts !== null ? prizePts : (rand < 0.4 ? 0 : Math.floor(Math.random() * 5) + 1);
-      setPrizePts(points);
+      const points = prizePts !== null ? prizePts : 0;
       handleAwardPoints(points);
     }
   }
