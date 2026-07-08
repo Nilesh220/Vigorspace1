@@ -192,22 +192,22 @@ export default function Events() {
               </div>
             </div>
             <div className="featured-event-info">
-              <div className="featured-event-name font-bungee" style={{ fontSize: '1.4rem', color: '#fff' }}>{selectedEvent.title}</div>
+              <div className="featured-event-name font-bungee" style={{ fontSize: '1.4rem', color: 'var(--pink)' }}>{selectedEvent.title}</div>
               <div className="event-meta" style={{ margin: '14px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className="event-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)' }}>
+                <div className="event-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', color: '#555555' }}>
                   <Calendar size={16} color="var(--pink)" />
                   <span>{getEventDateParts(selectedEvent.event_date).fullDate}</span>
                 </div>
-                <div className="event-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)' }}>
+                <div className="event-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', color: '#555555' }}>
                   <Clock size={16} color="var(--pink)" />
                   <span>{getEventDateParts(selectedEvent.event_date).time}</span>
                 </div>
-                <div className="event-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)' }}>
+                <div className="event-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.88rem', color: '#555555' }}>
                   <MapPin size={16} color="var(--pink)" />
                   <span>{selectedEvent.location}</span>
                 </div>
               </div>
-              <p className="featured-event-desc" style={{ fontSize: '0.88rem', lineHeight: 1.6, color: 'rgba(255,255,255,0.6)', marginBottom: 20 }}>
+              <p className="featured-event-desc" style={{ fontSize: '0.88rem', lineHeight: 1.6, color: '#666666', marginBottom: 20 }}>
                 {selectedEvent.description || 'No description provided.'}
               </p>
               <button 
