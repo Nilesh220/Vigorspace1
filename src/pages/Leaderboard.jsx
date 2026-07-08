@@ -68,15 +68,21 @@ export default function Leaderboard() {
       {/* Top 3 Podium */}
       {podiumOrder.length >= 3 && (
         <div className="podium">
-          {podiumOrder.map((person, i) => {
+          {podiumOrder.map((person) => {
             const isMe = user && person.id === user.id;
             const avatarSeed = person.full_name || person.id;
             const avatarUrl = person.avatar_url ||
               `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(avatarSeed)}`;
+            const rankNum = Number(person.rank);
             return (
-              <div key={person.id} className={`podium-item${isMe ? ' podium-me' : ''}`}>
-                <div className="rank-badge">{Number(person.rank)}</div>
-                <img src={avatarUrl} alt={person.full_name} />
+              <div key={person.id} className={`podium-item podium-rank-${rankNum}${isMe ? ' podium-me' : ''}`}>
+                <div className="crown-container">
+                  {rankNum === 1 && <span className="crown-emoji first">👑</span>}
+                  {rankNum === 2 && <span className="crown-emoji second">👑</span>}
+                  {rankNum === 3 && <span className="crown-emoji third">👑</span>}
+                </div>
+                <div className="rank-badge">{rankNum}</div>
+                <img src={avatarUrl} alt={person.full_name} className="podium-avatar" />
                 <div className="name">{person.full_name || 'User'}</div>
                 <div className="points">{person.total_points} pts</div>
               </div>
