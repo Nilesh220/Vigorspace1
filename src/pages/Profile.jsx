@@ -5,7 +5,7 @@ import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
-const tabs = ['Task Overview', 'Points History', 'Gift Cards Redeemed'];
+const tabs = ['Task Overview', 'Points History', 'Gift Cards Redeemed', 'My Booked Tickets'];
 
 export default function Profile() {
   const { user, profile, signOut } = useAuth();
@@ -14,6 +14,7 @@ export default function Profile() {
   const [submissions, setSubmissions] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [redemptions, setRedemptions] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [referralCount, setReferralCount] = useState(0);
@@ -26,6 +27,7 @@ export default function Profile() {
         { data: subs },
         { data: txns },
         { data: reds },
+        { data: bookedEvents },
         { data: rankData },
         { count: total },
         { count: refCount },
@@ -33,6 +35,7 @@ export default function Profile() {
         supabase.from('task_submissions').select('*, tasks(title, points)').eq('user_id', user.id).order('submitted_at', { ascending: false }),
         supabase.from('point_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('redemptions').select('*, rewards(name)').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('event_bookings').select('*, events(*)').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('leaderboard').select('rank').eq('id', user.id).maybeSingle(),
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('referrals').select('*', { count: 'exact', head: true }).eq('referrer_id', user.id),
@@ -40,6 +43,7 @@ export default function Profile() {
       setSubmissions(subs || []);
       setTransactions(txns || []);
       setRedemptions(reds || []);
+      setBookings(bookedEvents || []);
       setMyRank(rankData?.rank ?? null);
       setTotalUsers(total || 0);
       setReferralCount(refCount || 0);
@@ -252,6 +256,71 @@ export default function Profile() {
                   </div>
                 </div>
               ))}
+            </div>
+          )
+        )}
+
+        {activeTab === 3 && (
+          bookings.length === 0 ? (
+            <div className="profile-empty">No booked event tickets yet. Explore Events and book a spot!</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {bookings.map(b => {
+                const ev = b.events;
+                if (!ev) return null;
+                const eventDate = new Date(ev.event_date);
+                const dateString = eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                const timeString = eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                return (
+                  <div key={b.id} className="digital-ticket-stub">
+                    {/* Left Part: Event Details */}
+                    <div className="ticket-details-main">
+                      <div className="ticket-header-pill font-bungee">VIGOR SQUAD PASS</div>
+                      <h4 className="ticket-event-title font-bungee">{ev.title}</h4>
+                      
+                      <div className="ticket-info-grid">
+                        <div>
+                          <div className="ticket-info-label">DATE &amp; TIME</div>
+                          <div className="ticket-info-value">{dateString} at {timeString}</div>
+                        </div>
+                        <div>
+                          <div className="ticket-info-label">LOCATION</div>
+                          <div className="ticket-info-value">{ev.location}</div>
+                        </div>
+                      </div>
+
+                      <div className="ticket-footer-row">
+                        <div>
+                          <div className="ticket-info-label">ATTENDEE NAME</div>
+                          <div className="ticket-info-value" style={{ textTransform: 'uppercase', color: '#fff' }}>{b.full_name}</div>
+                        </div>
+                        <div>
+                          <div className="ticket-info-label">PASS ID</div>
+                          <div className="ticket-info-value font-mono" style={{ fontSize: '0.65rem', color: 'var(--yellow)' }}>{b.id.substring(0, 13).toUpperCase()}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tear-off vertical line indicator */}
+                    <div className="ticket-stub-divider">
+                      <div className="divider-notch top" />
+                      <div className="divider-dashed-line" />
+                      <div className="divider-notch bottom" />
+                    </div>
+
+                    {/* Right Part: QR/Barcode Stub */}
+                    <div className="ticket-details-stub">
+                      <div className="ticket-stub-barcode-container">
+                        {/* CSS barcode simulation lines */}
+                        <div className="barcode-sim" />
+                        <div className="barcode-num font-mono">{b.id.substring(b.id.length - 8).toUpperCase()}</div>
+                      </div>
+                      <div className="ticket-stub-squad-logo font-bungee">VS</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )
         )}

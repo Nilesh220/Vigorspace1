@@ -4210,6 +4210,19 @@ img {
   .rewards-tab-content-pink { padding: 0 16px 40px !important; }
   .rewards-tab-content-dark { padding: 24px 16px 40px !important; }
   .refer-list-container { padding: 0 16px 40px !important; }
+  .earn-page-hero { padding: 40px 16px 60px !important; }
+  .refer-page-hero { padding: 40px 16px 60px !important; }
+  .earn-cards-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important; }
+  
+  /* Prevent referral elements from going off screen */
+  .referral-link-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .btn-copy {
+    text-align: center;
+  }
+
 
 
   /* Main content shifts: top = mob-topbar height, bottom = bottom-nav height */
@@ -5440,6 +5453,231 @@ img {
     border-radius: 0;
   }
 }
+
+
+/* ── EVENT BOOKING POPUP MODAL ───────────────────────────────── */
+.booking-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.booking-popup-card {
+  background: var(--dark);
+  border: 2px solid var(--pink);
+  border-radius: 16px;
+  width: min(90vw, 440px);
+  padding: 30px 24px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+
+/* ── DIGITAL TICKET STUB LAYOUT (PROFILE) ─────────────────────── */
+.digital-ticket-stub {
+  background: linear-gradient(135deg, #2A1B3D 0%, #1B1B2F 100%);
+  border: 1.5px dashed rgba(232, 87, 109, 0.4);
+  border-radius: 14px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  min-height: 170px;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.digital-ticket-stub:hover {
+  transform: translateY(-2px);
+  border-color: var(--pink);
+}
+
+/* Main ticket side (left 75%) */
+.ticket-details-main {
+  flex: 3;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ticket-header-pill {
+  display: inline-block;
+  background: var(--pink);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  align-self: flex-start;
+  letter-spacing: 1px;
+}
+
+.ticket-event-title {
+  color: #fff;
+  font-size: 1rem;
+  margin: 10px 0;
+  letter-spacing: 0.5px;
+}
+
+.ticket-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ticket-info-label {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.ticket-info-value {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.ticket-footer-row {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+}
+
+/* Division Notch and dashed line */
+.ticket-stub-divider {
+  position: relative;
+  width: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.divider-notch {
+  width: 20px;
+  height: 20px;
+  background: #1B1B2F; /* matches outer workspace bg */
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.divider-notch.top {
+  top: -10px;
+  border-bottom: 1.5px dashed rgba(232, 87, 109, 0.4);
+}
+
+.divider-notch.bottom {
+  bottom: -10px;
+  border-top: 1.5px dashed rgba(232, 87, 109, 0.4);
+}
+
+.divider-dashed-line {
+  height: calc(100% - 20px);
+  width: 1px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.15);
+}
+
+/* Ticket Stub side (right 25%) */
+.ticket-details-stub {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticket-stub-barcode-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.barcode-sim {
+  width: 60px;
+  height: 50px;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff,
+    #fff 2px,
+    transparent 2px,
+    transparent 5px,
+    #fff 5px,
+    #fff 6px,
+    transparent 6px,
+    transparent 9px
+  );
+  opacity: 0.75;
+}
+
+.barcode-num {
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.ticket-stub-squad-logo {
+  font-size: 1.1rem;
+  color: var(--pink);
+  opacity: 0.9;
+  letter-spacing: -1px;
+}
+
+@media (max-width: 580px) {
+  .digital-ticket-stub {
+    flex-direction: column;
+    min-height: auto;
+  }
+  .ticket-stub-divider {
+    width: 100%;
+    height: 20px;
+    flex-direction: row;
+  }
+  .divider-notch.top {
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-right: 1.5px dashed rgba(232, 87, 109, 0.4);
+    border-bottom: none;
+  }
+  .divider-notch.bottom {
+    right: -10px;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 1.5px dashed rgba(232, 87, 109, 0.4);
+    border-top: none;
+  }
+  .divider-dashed-line {
+    width: calc(100% - 20px);
+    height: 1px;
+    border-left: none;
+    border-top: 2px dashed rgba(255, 255, 255, 0.15);
+  }
+  .ticket-details-stub {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 20px;
+  }
+  .barcode-sim {
+    height: 20px;
+    width: 100px;
+  }
+}
+
 
 
 

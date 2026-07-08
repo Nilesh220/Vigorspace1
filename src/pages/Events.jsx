@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Search, Calendar, Clock, MapPin, Ticket } from 'lucide-react';
+import { Search, Calendar, Clock, MapPin, Ticket, X } from 'lucide-react';
 import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 export default function Events() {
+  const { user, profile } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [bookedStatus, setBookedStatus] = useState({});
+
+  // Booking details popup states
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingName, setBookingName] = useState('');
+  const [bookingEmail, setBookingEmail] = useState('');
+  const [bookingPhone, setBookingPhone] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState('');
 
   useEffect(() => {
     async function fetchEvents() {
@@ -29,13 +39,28 @@ export default function Events() {
             setSelectedEvent(data[0]); // default select the first event as featured
           }
         }
+
+        if (user) {
+          const { data: bookings } = await supabase
+            .from('event_bookings')
+            .select('event_id')
+            .eq('user_id', user.id);
+
+          if (bookings) {
+            const status = {};
+            bookings.forEach(b => {
+              status[b.event_id] = true;
+            });
+            setBookedStatus(status);
+          }
+        }
       } catch (err) {
         console.error('Failed to load events from Supabase:', err);
       }
       setLoading(false);
     }
     fetchEvents();
-  }, []);
+  }, [user]);
 
   const filteredEvents = events.filter(ev =>
     ev.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -53,8 +78,56 @@ export default function Events() {
     };
   }
 
-  function handleBook(eventId) {
-    setBookedStatus(prev => ({ ...prev, [eventId]: true }));
+  function handleOpenBooking(ev) {
+    if (!user) {
+      alert('Please log in first to book tickets for events!');
+      return;
+    }
+    setSelectedEvent(ev);
+    setBookingName(profile?.full_name || '');
+    setBookingEmail(user?.email || '');
+    setBookingPhone('');
+    setBookingMessage('');
+    setShowBookingModal(true);
+  }
+
+  async function handleConfirmBooking(e) {
+    e.preventDefault();
+    if (!bookingName || !bookingPhone) {
+      setBookingMessage('Please fill in Name and Phone number.');
+      return;
+    }
+    setBookingLoading(true);
+    setBookingMessage('');
+
+    try {
+      const { error } = await supabase
+        .from('event_bookings')
+        .insert({
+          user_id: user.id,
+          event_id: selectedEvent.id,
+          full_name: bookingName,
+          email: bookingEmail,
+          phone: bookingPhone,
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          setBookingMessage('You have already booked a ticket for this event!');
+        } else {
+          setBookingMessage(error.message);
+        }
+      } else {
+        setBookedStatus(prev => ({ ...prev, [selectedEvent.id]: true }));
+        setBookingMessage('Booking successful! Your ticket has been generated.');
+        setTimeout(() => {
+          setShowBookingModal(false);
+        }, 1800);
+      }
+    } catch (err) {
+      setBookingMessage(err.message);
+    }
+    setBookingLoading(false);
   }
 
   if (loading) {
@@ -139,7 +212,7 @@ export default function Events() {
               </p>
               <button 
                 className="btn-book font-bungee" 
-                onClick={() => handleBook(selectedEvent.id)}
+                onClick={() => handleOpenBooking(selectedEvent)}
                 disabled={bookedStatus[selectedEvent.id]}
                 style={{
                   padding: '12px 36px',
@@ -177,6 +250,80 @@ export default function Events() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {showBookingModal && (
+        <div className="booking-popup-overlay" onClick={() => setShowBookingModal(false)}>
+          <div className="booking-popup-card" onClick={e => e.stopPropagation()}>
+            <button className="insta-control-btn" style={{ position: 'absolute', top: 16, right: 16, color: 'rgba(255,255,255,0.5)' }} onClick={() => setShowBookingModal(false)}>
+              <X size={20} />
+            </button>
+            
+            <h3 className="font-bungee" style={{ color: 'var(--pink)', marginBottom: 6, fontSize: '1.2rem' }}>EVENT BOOKING</h3>
+            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: 20 }}>
+              Book your spot for <strong>{selectedEvent?.title}</strong>. Fill in details to generate your digital ticket.
+            </p>
+
+            <form onSubmit={handleConfirmBooking} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>FULL NAME *</label>
+                <input 
+                  type="text" 
+                  className="settings-input" 
+                  style={{ width: '100%', padding: '10px 12px' }}
+                  value={bookingName}
+                  onChange={e => setBookingName(e.target.value)}
+                  placeholder="e.g. John Doe"
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>EMAIL ADDRESS (READONLY)</label>
+                <input 
+                  type="email" 
+                  className="settings-input" 
+                  style={{ width: '100%', padding: '10px 12px', opacity: 0.6 }}
+                  value={bookingEmail}
+                  readOnly
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>PHONE NUMBER *</label>
+                <input 
+                  type="tel" 
+                  className="settings-input" 
+                  style={{ width: '100%', padding: '10px 12px' }}
+                  value={bookingPhone}
+                  onChange={e => setBookingPhone(e.target.value)}
+                  placeholder="e.g. +91 98765 43210"
+                  required
+                />
+              </div>
+
+              {bookingMessage && (
+                <div style={{ 
+                  color: bookingMessage.includes('successful') ? '#4CAF50' : '#E8576D', 
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  marginTop: 4
+                }}>
+                  {bookingMessage}
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                className="admin-btn admin-btn-pink font-bungee" 
+                style={{ width: '100%', marginTop: 8 }}
+                disabled={bookingLoading}
+              >
+                {bookingLoading ? 'CONFIRMING...' : 'CONFIRM BOOKING'}
+              </button>
+            </form>
           </div>
         </div>
       )}
