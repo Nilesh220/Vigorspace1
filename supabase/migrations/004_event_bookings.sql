@@ -17,12 +17,15 @@ create table if not exists public.event_bookings (
 alter table public.event_bookings enable row level security;
 
 -- POLICIES
+drop policy if exists "Users can view their own event bookings" on public.event_bookings;
 create policy "Users can view their own event bookings"
   on public.event_bookings for select using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own event bookings" on public.event_bookings;
 create policy "Users can insert their own event bookings"
   on public.event_bookings for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Admins can view and manage all bookings" on public.event_bookings;
 create policy "Admins can view and manage all bookings"
   on public.event_bookings for all using (
     exists (
