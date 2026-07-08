@@ -21,7 +21,7 @@ export default function TaskDetails() {
   const [submission, setSubmission] = useState(null); // existing submission if any
   const [loading, setLoading] = useState(true);
   const [proofLink, setProofLink] = useState('');
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -64,20 +64,32 @@ export default function TaskDetails() {
 
     let proofUrl = null;
 
-    // Upload proof file if provided
-    if (file) {
-      const ext = file.name.split('.').pop();
-      const path = `${user.id}/${id}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from('task-proofs')
-        .upload(path, file, { upsert: false });
+    // Upload proof files if provided
+    if (files.length > 0) {
+      try {
+        const paths = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const ext = file.name.split('.').pop();
+          const path = `${user.id}/${id}/${Date.now()}_${i}.${ext}`;
+          
+          const { error: uploadErr } = await supabase.storage
+            .from('task-proofs')
+            .upload(path, file, { upsert: false });
 
-      if (uploadErr) {
-        setSubmitError('File upload failed: ' + uploadErr.message);
+          if (uploadErr) {
+            setSubmitError(`File ${file.name} upload failed: ` + uploadErr.message);
+            setSubmitting(false);
+            return;
+          }
+          paths.push(path);
+        }
+        proofUrl = paths.length === 1 ? paths[0] : JSON.stringify(paths);
+      } catch (err) {
+        setSubmitError(err.message);
         setSubmitting(false);
         return;
       }
-      proofUrl = path;
     }
 
     // Insert submission
@@ -190,8 +202,8 @@ export default function TaskDetails() {
             <form onSubmit={handleSubmit}>
               <div className="task-detail-section">
                 <h4>PROOF OF COMPLETION:</h4>
-                <p style={{ marginBottom: 8, fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)' }}>
-                  Screenshot of your completed task:
+                 <p style={{ marginBottom: 8, fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)' }}>
+                  Screenshots of your completed task (Choose up to 5 images):
                 </p>
                 <div
                   className="upload-area"
@@ -199,14 +211,19 @@ export default function TaskDetails() {
                   style={{ cursor: 'pointer' }}
                 >
                   <Upload size={16} />
-                  <span>{file ? file.name : 'Upload'}</span>
+                  <span>
+                    {files.length > 0 
+                      ? `${files.length} screenshots chosen` 
+                      : 'Upload screenshots'}
+                  </span>
                 </div>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  multiple
                   style={{ display: 'none' }}
-                  onChange={e => setFile(e.target.files[0] || null)}
+                  onChange={e => setFiles(Array.from(e.target.files || []).slice(0, 5))}
                 />
 
                 <p style={{ margin: '16px 0 8px', fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)' }}>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, ExternalLink, Eye, X } from 'lucide-react';
+import { CheckCircle, XCircle, ExternalLink, Eye, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 const STATUS_COLORS = { pending: '#F5C842', approved: '#4CAF50', rejected: '#E8576D' };
@@ -9,6 +9,12 @@ export default function AdminSubmissions() {
   const [filter, setFilter] = useState('pending');
   const [loading, setLoading] = useState(true);
   const [previewProof, setPreviewProof] = useState(null);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+
+  // Reset carousel position when opening a different proof
+  useEffect(() => {
+    setCarouselIdx(0);
+  }, [previewProof]);
 
   async function load() {
     if (!supabase) return;
@@ -29,6 +35,30 @@ export default function AdminSubmissions() {
     await supabase.from('task_submissions').update({ status, reviewed_at: new Date().toISOString() }).eq('id', id);
     load();
   }
+
+  // Parse screenshots list from proof_url
+  const getImagesList = () => {
+    if (!previewProof || previewProof.type !== 'image') return [];
+    try {
+      if (previewProof.content.startsWith('[')) {
+        const parsed = JSON.parse(previewProof.content);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return [previewProof.content];
+  };
+
+  // Convert storage path/slugs to full public URL
+  const getFullImageUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const { data } = supabase.storage.from('task-proofs').getPublicUrl(path);
+    return data?.publicUrl || '';
+  };
+
+  const imagesList = getImagesList();
 
   return (
     <div className="admin-page">
@@ -133,13 +163,46 @@ export default function AdminSubmissions() {
               SUBMISSION PROOF PREVIEW
             </h3>
 
-            <div style={{ background: '#0a0a14', borderRadius: 8, padding: 12, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 180, border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+            <div style={{ background: '#0a0a14', borderRadius: 8, padding: 12, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 180, border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden', position: 'relative' }}>
               {previewProof.type === 'image' ? (
-                <img 
-                  src={previewProof.content} 
-                  alt="Proof Screenshot" 
-                  style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: 6 }} 
-                />
+                <>
+                  <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    
+                    {/* Left arrow if multi-image */}
+                    {imagesList.length > 1 && (
+                      <button 
+                        onClick={() => setCarouselIdx(prev => (prev === 0 ? imagesList.length - 1 : prev - 1))}
+                        style={{ position: 'absolute', left: 8, background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                    )}
+
+                    <img 
+                      src={getFullImageUrl(imagesList[carouselIdx])} 
+                      alt={`Proof Screenshot ${carouselIdx + 1}`} 
+                      style={{ maxWidth: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: 6 }} 
+                    />
+
+                    {/* Right arrow if multi-image */}
+                    {imagesList.length > 1 && (
+                      <button 
+                        onClick={() => setCarouselIdx(prev => (prev === imagesList.length - 1 ? 0 : prev + 1))}
+                        style={{ position: 'absolute', right: 8, background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    )}
+
+                  </div>
+
+                  {/* Pagination Indicator */}
+                  {imagesList.length > 1 && (
+                    <div style={{ marginTop: 12, color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', fontWeight: 600 }}>
+                      Image {carouselIdx + 1} of {imagesList.length}
+                    </div>
+                  )}
+                </>
               ) : (
                 <div style={{ textAlign: 'center', width: '100%' }}>
                   <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.88rem', wordBreak: 'break-all', marginBottom: 20 }}>
