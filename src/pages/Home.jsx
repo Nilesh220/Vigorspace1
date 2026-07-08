@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { Play, Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from 'lucide-react';
 import Ticker from '../components/layout/Ticker';
 import FAQAccordion from '../components/ui/FAQAccordion';
@@ -45,6 +46,20 @@ function BrandCard({ src, alt, size = 140 }) {
 
 export default function Home() {
   const [rewardsExpanded, setRewardsExpanded] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [stories, setStories] = useState([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const [{ data: eventsData }, { data: storiesData }] = await Promise.all([
+        supabase.from('events').select('*').eq('is_active', true).order('event_date', { ascending: true }).limit(3),
+        supabase.from('stories').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(4),
+      ]);
+      if (eventsData) setEvents(eventsData);
+      if (storiesData) setStories(storiesData);
+    }
+    loadData();
+  }, []);
 
   return (
     <div>
@@ -189,20 +204,37 @@ export default function Home() {
 
           {/* Event cards row */}
           <div className="events-cards-row">
-            {[
-              { img: feedPost1, title: 'Youth Creators Summit', date: 'Aug 10, 2026', loc: 'Mumbai' },
-              { img: feedPost2, title: 'Night of Talent', date: 'Aug 22, 2026', loc: 'Pune' },
-              { img: feedPost3, title: 'Community Connect', date: 'Sep 5, 2026', loc: 'Delhi' },
-            ].map((ev, i) => (
-              <div key={i} className="event-card">
-                <img src={ev.img} alt={ev.title} className="event-card-img" />
-                <div className="event-card-body">
-                  <div className="event-card-title">{ev.title}</div>
-                  <div className="event-card-meta">{ev.date} · {ev.loc}</div>
-                  <button className="btn-know-more" style={{ marginTop: 10, fontSize: '0.7rem' }}>KNOW MORE</button>
+            {events.length === 0 ? (
+              [
+                { image_url: feedPost1, title: 'Youth Creators Summit', event_date: '2026-08-10', location: 'Mumbai' },
+                { image_url: feedPost2, title: 'Night of Talent', event_date: '2026-08-22', location: 'Pune' },
+                { image_url: feedPost3, title: 'Community Connect', event_date: '2026-09-05', location: 'Delhi' },
+              ].map((ev, i) => (
+                <div key={i} className="event-card">
+                  <img src={ev.image_url} alt={ev.title} className="event-card-img" />
+                  <div className="event-card-body">
+                    <div className="event-card-title">{ev.title}</div>
+                    <div className="event-card-meta">
+                      {new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {ev.location}
+                    </div>
+                    <button className="btn-know-more" style={{ marginTop: 10, fontSize: '0.7rem' }}>KNOW MORE</button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              events.map(ev => (
+                <div key={ev.id} className="event-card">
+                  <img src={ev.image_url || feedPost1} alt={ev.title} className="event-card-img" />
+                  <div className="event-card-body">
+                    <div className="event-card-title">{ev.title}</div>
+                    <div className="event-card-meta">
+                      {new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {ev.location}
+                    </div>
+                    <button className="btn-know-more" style={{ marginTop: 10, fontSize: '0.7rem' }}>KNOW MORE</button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -216,26 +248,44 @@ export default function Home() {
             health challenges, watch young individuals share their journeys to resilience and growth.
           </p>
           <div className="stories-grid">
-            {[
-              { title: 'Overcoming career confusion',                           name: 'Avi Parihar',    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop' },
-              { title: 'Tips for Self-Care and Well-Being',                    name: 'Aradhya Warang', img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop' },
-              { title: 'Strategies for Career Clarity',                        name: 'Karan Rawool',   img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop' },
-              { title: 'Mind Matters: Prioritizing Mental Health in a Busy World', name: 'Palash Shah', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop' },
-            ].map((story, i) => (
-              <div key={i} className="story-card">
-                <img src={story.img} alt={story.title} />
-                <div className="story-card-overlay">
-                  <div className="story-play-btn">
-                    <Play size={18} fill="#fff" color="#fff" />
-                  </div>
-                  <div className="story-card-title">{story.title}</div>
-                  <div className="story-card-author">
-                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${story.name}`} alt={story.name} />
-                    <span>{story.name}</span>
+            {stories.length === 0 ? (
+              [
+                { title: 'Overcoming career confusion',                           author: 'Avi Parihar',    image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop' },
+                { title: 'Tips for Self-Care and Well-Being',                    author: 'Aradhya Warang', image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop' },
+                { title: 'Strategies for Career Clarity',                        author: 'Karan Rawool',   image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop' },
+                { title: 'Mind Matters: Prioritizing Mental Health in a Busy World', author: 'Palash Shah', image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop' },
+              ].map((story, i) => (
+                <div key={i} className="story-card">
+                  <img src={story.image_url} alt={story.title} />
+                  <div className="story-card-overlay">
+                    <div className="story-play-btn">
+                      <Play size={18} fill="#fff" color="#fff" />
+                    </div>
+                    <div className="story-card-title">{story.title}</div>
+                    <div className="story-card-author">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(story.author)}`} alt={story.author} />
+                      <span>{story.author}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              stories.map(story => (
+                <div key={story.id} className="story-card">
+                  <img src={story.image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop'} alt={story.title} />
+                  <div className="story-card-overlay">
+                    <div className="story-play-btn">
+                      <Play size={18} fill="#fff" color="#fff" />
+                    </div>
+                    <div className="story-card-title">{story.title}</div>
+                    <div className="story-card-author">
+                      <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(story.author)}`} alt={story.author} />
+                      <span>{story.author}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           <button className="btn-explore-more" style={{ marginTop: 20 }}>EXPLORE MORE</button>
         </div>

@@ -1623,6 +1623,21 @@ img {
   );
 }
 
+/* Containers and responsive blocks */
+.rewards-tab-content-pink {
+  background: var(--pink);
+  padding: 0 60px 80px;
+}
+.rewards-tab-content-dark {
+  background: var(--dark);
+  padding: 40px 60px 80px;
+}
+.refer-list-container {
+  padding: 0 60px 60px;
+  background: var(--pink);
+  position: relative;
+}
+
 /* ── REWARDS PAGE ─────────────────────────────────────────── */
 .rewards-page-hero {
   padding: 50px 60px 30px;
@@ -4190,6 +4205,12 @@ img {
   .mob-topbar           { display: flex; }
   .mob-bottom-nav       { display: flex; }
   .mob-drawer-overlay   { display: block; }
+
+  /* Responsive padding overrides */
+  .rewards-tab-content-pink { padding: 0 16px 40px !important; }
+  .rewards-tab-content-dark { padding: 24px 16px 40px !important; }
+  .refer-list-container { padding: 0 16px 40px !important; }
+
 
   /* Main content shifts: top = mob-topbar height, bottom = bottom-nav height */
   .main-content {

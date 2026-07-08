@@ -93,7 +93,7 @@ export default function Refer() {
       </div>
 
       {/* Referral List */}
-      <div style={{ padding: '0 60px 60px', background: 'var(--pink)', position: 'relative' }}>
+      <div className="refer-list-container">
         <div className="referral-list">
           {loading ? (
             <div style={{ textAlign: 'center', padding: '40px 0' }}>

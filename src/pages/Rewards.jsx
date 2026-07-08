@@ -97,7 +97,7 @@ export default function Rewards() {
 
       {/* Tab Content */}
       {activeTab === 'rewards' ? (
-        <div style={{ background: 'var(--pink)', padding: '0 60px 80px' }}>
+        <div className="rewards-tab-content-pink">
           <div className="streak-card">
             <h3>7 Day Streak Rewards</h3>
             <p>
@@ -121,7 +121,7 @@ export default function Rewards() {
           </div>
         </div>
       ) : (
-        <div style={{ background: 'var(--dark)', padding: '40px 60px 80px' }}>
+        <div className="rewards-tab-content-dark">
           {redeemError && (
             <div style={{ color: '#E8576D', marginBottom: 16, fontSize: '0.9rem' }}>
               {redeemError}

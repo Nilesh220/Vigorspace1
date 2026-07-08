@@ -9,6 +9,8 @@ import AdminSubmissions from './pages/AdminSubmissions';
 import AdminRewards from './pages/AdminRewards';
 import AdminRedemptions from './pages/AdminRedemptions';
 import AdminMessages from './pages/AdminMessages';
+import AdminEvents from './pages/AdminEvents';
+import AdminStories from './pages/AdminStories';
 
 export default function AdminApp() {
   const [checking, setChecking] = useState(true);
@@ -57,6 +59,8 @@ export default function AdminApp() {
         <Route path="submissions" element={<AdminSubmissions />} />
         <Route path="rewards" element={<AdminRewards />} />
         <Route path="redemptions" element={<AdminRedemptions />} />
+        <Route path="events" element={<AdminEvents />} />
+        <Route path="stories" element={<AdminStories />} />
         <Route path="messages" element={<AdminMessages />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Route>
