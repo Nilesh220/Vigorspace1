@@ -4094,16 +4094,67 @@ img {
   .hiw-step     { width: 100% !important; }
 
   /* ── REWARDS SCATTERED ─────────────────────── */
-  .rewards-scattered-section { min-height: auto !important; padding: 50px 16px !important; }
-  .rs-card { width: 100px !important; height: 100px !important; }
-  .rs-center { max-width: 240px !important; }
+  /* Force stacked / collapsed mode on mobile — no absolute positioning mess */
+  .rewards-scattered-section {
+    min-height: 380px !important;
+    padding: 48px 20px !important;
+  }
+  /* All cards pile up centred like the stacked desktop state */
+  .rs-card {
+    width: 140px !important;
+    height: 140px !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+  }
+  .rs-amazon  { transform: translate(-50%, -50%) rotate(-10deg) !important; z-index: 6 !important; opacity: 1 !important; }
+  .rs-swiggy  { transform: translate(-50%, -50%) rotate(6deg)  !important; z-index: 5 !important; opacity: 1 !important; }
+  .rs-gplay   { transform: translate(-50%, -50%) rotate(-3deg) !important; z-index: 4 !important; opacity: 1 !important; }
+  .rs-myntra  { transform: translate(-50%, -50%) rotate(12deg) !important; z-index: 3 !important; opacity: 1 !important; }
+  .rs-spotify { transform: translate(-50%, -50%) rotate(-6deg) !important; z-index: 2 !important; opacity: 1 !important; }
+  .rs-netflix { transform: translate(-50%, -50%) rotate(4deg)  !important; z-index: 1 !important; opacity: 1 !important; }
+  /* Hide the centre text/button in stacked mobile view */
+  .rs-center  { display: none !important; }
 
   /* ── EVENTS ────────────────────────────────── */
-  .events-cards-row  { flex-direction: column !important; align-items: center !important; gap: 16px !important; }
-  .event-card        { width: 100% !important; max-width: 360px !important; }
+  /* Stack cards vertically */
+  .events-cards-row  { grid-template-columns: 1fr !important; gap: 20px !important; }
+  .event-card        { width: 100% !important; max-width: 100% !important; }
+  /* Move stickers away from title so they don't overlap */
+  .ev-s1 { top: -10px !important; left: 0 !important;  width: 64px !important; }
+  .ev-s2 { top: -10px !important; right: 0 !important; width: 56px !important; }
+  .ev-s3 { display: none !important; }
+  .ev-s4 { display: none !important; }
+  .events-header { margin-bottom: 40px !important; padding-top: 20px !important; }
+  .ev-pizza { width: 44px !important; }
 
   /* ── SOCIAL FEED ────────────────────────────── */
   .social-feed-row   { flex-direction: column !important; align-items: center !important; gap: 16px !important; }
+
+  /* ── COMMUNITY ─────────────────────────────── */
+  /* Stack text above card, card no longer overflows right */
+  .community-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 28px !important;
+  }
+  .community-text {
+    max-width: 100% !important;
+  }
+  .whatsapp-preview {
+    width: 100% !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+  }
+  /* Shrink circle so it doesn't dominate */
+  .community-circle {
+    width: 280px !important;
+    height: 280px !important;
+    right: -80px !important;
+    top: auto !important;
+    bottom: -60px !important;
+    transform: none !important;
+  }
 
   /* ── CONTACT ────────────────────────────────── */
   .contact-body    { flex-direction: column; padding: 24px 18px 80px; gap: 28px; }
