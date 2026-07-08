@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Play, Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from 'lucide-react';
+import StoryModal from '../components/ui/StoryModal';
 import Ticker from '../components/layout/Ticker';
 import FAQAccordion from '../components/ui/FAQAccordion';
 import Footer from '../components/layout/Footer';
@@ -45,9 +47,11 @@ function BrandCard({ src, alt, size = 140 }) {
 
 
 export default function Home() {
+  const navigate = useNavigate();
   const [rewardsExpanded, setRewardsExpanded] = useState(false);
   const [events, setEvents] = useState([]);
   const [stories, setStories] = useState([]);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(null);
 
   useEffect(() => {
     async function loadData() {
@@ -250,12 +254,12 @@ export default function Home() {
           <div className="stories-grid">
             {stories.length === 0 ? (
               [
-                { title: 'Overcoming career confusion',                           author: 'Avi Parihar',    image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop' },
-                { title: 'Tips for Self-Care and Well-Being',                    author: 'Aradhya Warang', image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop' },
-                { title: 'Strategies for Career Clarity',                        author: 'Karan Rawool',   image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop' },
-                { title: 'Mind Matters: Prioritizing Mental Health in a Busy World', author: 'Palash Shah', image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop' },
-              ].map((story, i) => (
-                <div key={i} className="story-card">
+                { id: 1, title: 'Overcoming career confusion',                           author: 'Avi Parihar',    image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop' },
+                { id: 2, title: 'Tips for Self-Care and Well-Being',                    author: 'Aradhya Warang', image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop' },
+                { id: 3, title: 'Strategies for Career Clarity',                        author: 'Karan Rawool',   image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop' },
+                { id: 4, title: 'Mind Matters: Prioritizing Mental Health in a Busy World', author: 'Palash Shah', image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop' },
+              ].map((story, i, arr) => (
+                <div key={i} className="story-card" onClick={() => setActiveStoryIndex(i)}>
                   <img src={story.image_url} alt={story.title} />
                   <div className="story-card-overlay">
                     <div className="story-play-btn">
@@ -270,8 +274,8 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              stories.map(story => (
-                <div key={story.id} className="story-card">
+              stories.map((story, i) => (
+                <div key={story.id} className="story-card" onClick={() => setActiveStoryIndex(i)}>
                   <img src={story.image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop'} alt={story.title} />
                   <div className="story-card-overlay">
                     <div className="story-play-btn">
@@ -287,7 +291,20 @@ export default function Home() {
               ))
             )}
           </div>
-          <button className="btn-explore-more" style={{ marginTop: 20 }}>EXPLORE MORE</button>
+          <button className="btn-explore-more" style={{ marginTop: 20 }} onClick={() => navigate('/stories')}>EXPLORE MORE</button>
+
+          {activeStoryIndex !== null && (
+            <StoryModal 
+              stories={stories.length === 0 ? [
+                { id: 1, title: 'Overcoming career confusion',                           author: 'Avi Parihar',    image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop' },
+                { id: 2, title: 'Tips for Self-Care and Well-Being',                    author: 'Aradhya Warang', image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop' },
+                { id: 3, title: 'Strategies for Career Clarity',                        author: 'Karan Rawool',   image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop' },
+                { id: 4, title: 'Mind Matters: Prioritizing Mental Health in a Busy World', author: 'Palash Shah', image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop' },
+              ] : stories}
+              initialIndex={activeStoryIndex}
+              onClose={() => setActiveStoryIndex(null)}
+            />
+          )}
         </div>
       </section>
 

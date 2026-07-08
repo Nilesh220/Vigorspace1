@@ -1,87 +1,65 @@
-import { useState } from 'react';
-import { Play, Flame, Compass, MessageCircle, Heart, Star, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Play, Flame, Compass, Heart, Sparkles, Plus } from 'lucide-react';
 import Footer from '../components/layout/Footer';
-
-const INITIAL_STORIES = [
-  {
-    id: 1,
-    title: 'Overcoming Career Confusion',
-    category: 'Career Guidance',
-    author: 'Avi Parihar',
-    duration: '5:12',
-    likes: 142,
-    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop',
-    featured: true,
-  },
-  {
-    id: 2,
-    title: 'Tips for Self-Care & Well-Being',
-    category: 'Mental Health',
-    author: 'Aradhya Warang',
-    duration: '4:45',
-    likes: 98,
-    img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=500&fit=crop',
-    featured: false,
-  },
-  {
-    id: 3,
-    title: 'Strategies for Career Clarity',
-    category: 'Career Guidance',
-    author: 'Karan Rawool',
-    duration: '6:30',
-    likes: 189,
-    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=500&fit=crop',
-    featured: true,
-  },
-  {
-    id: 4,
-    title: 'Mind Matters: Prioritizing Self',
-    category: 'Mental Health',
-    author: 'Palash Shah',
-    duration: '3:50',
-    likes: 76,
-    img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=500&fit=crop',
-    featured: false,
-  },
-  {
-    id: 5,
-    title: 'Navigating Industry Readiness',
-    category: 'Professional Development',
-    author: 'Sanya Malhotra',
-    duration: '8:15',
-    likes: 212,
-    img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=500&fit=crop',
-    featured: false,
-  },
-  {
-    id: 6,
-    title: 'Finding Creativity in Tech',
-    category: 'Life Lessons',
-    author: 'Rohan Joshi',
-    duration: '5:40',
-    likes: 154,
-    img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&h=500&fit=crop',
-    featured: false,
-  },
-];
+import { supabase } from '../lib/supabase';
+import StoryModal from '../components/ui/StoryModal';
 
 export default function Stories() {
   const [activeTab, setActiveTab] = useState('All');
-  const [stories, setStories] = useState(INITIAL_STORIES);
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(null);
 
   const categories = ['All', 'Career Guidance', 'Mental Health', 'Professional Development', 'Life Lessons'];
+
+  useEffect(() => {
+    async function fetchStories() {
+      const { data, error } = await supabase
+        .from('stories')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (!error) {
+        setStories(data || []);
+      }
+      setLoading(false);
+    }
+    fetchStories();
+  }, []);
 
   const filteredStories = activeTab === 'All' 
     ? stories 
     : stories.filter(s => s.category === activeTab);
 
-  function handleLike(id) {
-    setStories(prev => prev.map(s => {
-      if (s.id === id) {
-        return { ...s, likes: s.likes + 1, hasLiked: true };
-      }
-      return s;
-    }));
+  async function handleLike(e, storyId, currentLikes) {
+    e.stopPropagation(); // prevent opening the story modal when clicking like
+    
+    // Check if already liked in local state to prevent multiple clicks
+    const story = stories.find(s => s.id === storyId);
+    if (story?.hasLiked) return;
+
+    const { error } = await supabase
+      .from('stories')
+      .update({ likes: currentLikes + 1 })
+      .eq('id', storyId);
+
+    if (!error) {
+      setStories(prev => prev.map(s => {
+        if (s.id === storyId) {
+          return { ...s, likes: s.likes + 1, hasLiked: true };
+        }
+        return s;
+      }));
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner" />
+      </div>
+    );
   }
 
   return (
@@ -91,7 +69,7 @@ export default function Stories() {
         <span className="stories-badge font-caveat">SQUAD TALKS</span>
         <h1 className="stories-main-title font-bungee">STORIES</h1>
         <p className="stories-subtitle">
-          Discover inspiring tales of triumph. Watch young individuals share their journeys to resilience, growth, and clarity.
+          Discover inspiring tales of triumph. Click on any story to view it in fullscreen slideshow format.
         </p>
 
         {/* Categories Tab Bar */}
@@ -120,22 +98,22 @@ export default function Stories() {
           </div>
         ) : (
           <div className="stories-media-grid">
-            {filteredStories.map(story => (
-              <div key={story.id} className="story-media-card">
+            {filteredStories.map((story, i) => (
+              <div 
+                key={story.id} 
+                className="story-media-card" 
+                onClick={() => setActiveStoryIndex(i)}
+                style={{ cursor: 'pointer' }}
+              >
                 {/* Media Wrapper */}
                 <div className="story-media-wrapper">
-                  <img src={story.img} alt={story.title} className="story-img" />
+                  <img src={story.image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop'} alt={story.title} className="story-img" />
                   <div className="story-card-overlay-btn">
                     <div className="story-play-icon-circle">
                       <Play size={22} fill="#fff" color="#fff" />
                     </div>
                   </div>
-                  <span className="story-duration-tag">{story.duration}</span>
-                  {story.featured && (
-                    <span className="story-featured-badge">
-                      <Flame size={12} fill="#F5C842" color="#F5C842" /> FEATURED
-                    </span>
-                  )}
+                  <span className="story-duration-tag">{story.duration || '5:00'}</span>
                 </div>
 
                 {/* Content info */}
@@ -154,7 +132,7 @@ export default function Stories() {
 
                     <button 
                       className={`story-like-btn ${story.hasLiked ? 'liked' : ''}`}
-                      onClick={() => handleLike(story.id)}
+                      onClick={(e) => handleLike(e, story.id, story.likes)}
                     >
                       <Heart size={15} fill={story.hasLiked ? '#E8576D' : 'transparent'} />
                       <span>{story.likes}</span>
@@ -166,6 +144,15 @@ export default function Stories() {
           </div>
         )}
       </div>
+
+      {/* Full Screen Instagram-style Stories Overlay */}
+      {activeStoryIndex !== null && (
+        <StoryModal 
+          stories={filteredStories}
+          initialIndex={activeStoryIndex}
+          onClose={() => setActiveStoryIndex(null)}
+        />
+      )}
 
       <Footer />
     </div>
