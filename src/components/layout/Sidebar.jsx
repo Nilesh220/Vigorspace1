@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Target, Gift, Users, Phone, Trophy, User, Menu, X, Bell, LogIn } from 'lucide-react';
+import { Home, Calendar, Target, Gift, Users, Phone, Trophy, User, Menu, X, Bell, LogIn, Tv, Newspaper, Settings } from 'lucide-react';
 import vigorLogo from '../../assets/Group.png';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,6 +21,15 @@ const bottomNavItems = [
   { to: '/earn',    icon: Target,   label: 'Earn' },
   { to: '/rewards', icon: Gift,     label: 'Rewards' },
   { to: '/refer',   icon: Users,    label: 'Refer' },
+];
+
+// Drawer nav items match the mockup exactly: Leaderboard, Stories, News, Community, Settings
+const drawerNavItems = [
+  { to: '/leaderboard', icon: Trophy,    label: 'Leaderboard' },
+  { to: '/stories',     icon: Tv,        label: 'Stories' },
+  { to: '/news',        icon: Newspaper, label: 'News' },
+  { to: '/community',   icon: Users,     label: 'Community' },
+  { to: '/settings',    icon: Settings,  label: 'Settings' },
 ];
 
 export default function Sidebar() {
@@ -149,7 +158,7 @@ export default function Sidebar() {
 
             {/* All nav links */}
             <nav className="mob-drawer-nav">
-              {allNavItems.map(({ to, icon: Icon, label, end }) => (
+              {drawerNavItems.map(({ to, icon: Icon, label, end }) => (
                 <NavLink
                   key={to}
                   to={to}

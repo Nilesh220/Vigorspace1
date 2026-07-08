@@ -11,6 +11,10 @@ import Refer from './pages/Refer';
 import TaskDetails from './pages/TaskDetails';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
+import Stories from './pages/Stories';
+import News from './pages/News';
+import CommunityPage from './pages/CommunityPage';
+import Settings from './pages/Settings';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import NotFound from './pages/NotFound';
@@ -42,6 +46,10 @@ export default function App() {
             <Route path="/refer"        element={<ProtectedRoute><Refer /></ProtectedRoute>} />
             <Route path="/leaderboard"  element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/profile"      element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/stories"      element={<ProtectedRoute><Stories /></ProtectedRoute>} />
+            <Route path="/news"         element={<ProtectedRoute><News /></ProtectedRoute>} />
+            <Route path="/community"    element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
+            <Route path="/settings"     element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
