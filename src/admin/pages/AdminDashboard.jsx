@@ -20,31 +20,103 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({});
   const [recentUsers, setRecentUsers] = useState([]);
   const [recentSubs, setRecentSubs] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       if (!supabase) return;
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+      const sevenDaysAgoISO = sevenDaysAgo.toISOString();
+
       const [
         { count: totalUsers },
         { count: pending },
         { count: totalRedeem },
         { data: users },
         { data: subs },
+        { data: dailySignups },
+        { data: dailyBookings },
+        { data: dailyPoints },
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('task_submissions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('redemptions').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('full_name, email, total_points, created_at').order('created_at', { ascending: false }).limit(5),
         supabase.from('task_submissions').select('id, status, submitted_at, profiles(full_name), tasks(title)').order('submitted_at', { ascending: false }).limit(5),
+        supabase.from('profiles').select('created_at').gte('created_at', sevenDaysAgoISO),
+        supabase.from('event_bookings').select('created_at').gte('created_at', sevenDaysAgoISO),
+        supabase.from('point_transactions').select('created_at, delta').gt('delta', 0).gte('created_at', sevenDaysAgoISO),
       ]);
+
+      // Construct last 7 days array locally
+      const daysArray = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const dateVal = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${dateVal}`;
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+        daysArray.push({ dateStr, dayLabel, signups: 0, bookings: 0, points: 0 });
+      }
+
+      // Aggregate live signups
+      (dailySignups || []).forEach(item => {
+        if (!item.created_at) return;
+        const dateStr = item.created_at.split('T')[0];
+        const dayObj = daysArray.find(x => x.dateStr === dateStr);
+        if (dayObj) dayObj.signups++;
+      });
+
+      // Aggregate live bookings
+      (dailyBookings || []).forEach(item => {
+        if (!item.created_at) return;
+        const dateStr = item.created_at.split('T')[0];
+        const dayObj = daysArray.find(x => x.dateStr === dateStr);
+        if (dayObj) dayObj.bookings++;
+      });
+
+      // Aggregate points transactions
+      (dailyPoints || []).forEach(item => {
+        if (!item.created_at) return;
+        const dateStr = item.created_at.split('T')[0];
+        const dayObj = daysArray.find(x => x.dateStr === dateStr);
+        if (dayObj) dayObj.points += item.delta;
+      });
+
       setStats({ totalUsers, pending, totalRedeem });
       setRecentUsers(users || []);
       setRecentSubs(subs || []);
+      setChartData(daysArray);
       setLoading(false);
     }
     load();
   }, []);
+
+  const getPointsPath = (type) => {
+    if (!chartData || chartData.length === 0) return '';
+    return chartData.map((d, i) => {
+      let val = 0;
+      if (type === 'signups') val = d.signups * 10;
+      else if (type === 'bookings') val = d.bookings * 10;
+      else if (type === 'points') val = d.points / 10;
+      
+      const x = 70 + i * 80;
+      const y = 170 - (Math.min(100, val) / 100) * 150;
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    }).join(' ');
+  };
+
+  const getAreaPath = (type) => {
+    const line = getPointsPath(type);
+    if (!line) return '';
+    return `${line} L 550 170 L 70 170 Z`;
+  };
 
   const statusBadge = (s) => {
     const colors = { pending: '#F5C842', approved: '#4CAF50', rejected: '#E8576D' };
@@ -80,7 +152,7 @@ export default function AdminDashboard() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#F5C842', display: 'inline-block' }} />
-            <span style={{ color: 'rgba(255,255,255,0.7)' }}>Points Awarded (x100)</span>
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>Points Awarded (Scaled ÷10)</span>
           </div>
         </div>
 
@@ -114,49 +186,40 @@ export default function AdminDashboard() {
             <text x="15" y="124" fill="rgba(255,255,255,0.3)" fontSize="9">30</text>
             <text x="15" y="174" fill="rgba(255,255,255,0.3)" fontSize="9">0</text>
 
-            {/* X-axis days (Mon to Sun) */}
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-              <text key={day} x={70 + i * 80} y="195" fill="rgba(255,255,255,0.5)" fontSize="10" textAnchor="middle">{day}</text>
+            {/* X-axis days (Dynamic weekdays) */}
+            {chartData.map((d, i) => (
+              <text key={i} x={70 + i * 80} y="195" fill="rgba(255,255,255,0.5)" fontSize="10" textAnchor="middle">{d.dayLabel}</text>
             ))}
 
-            {/* Chart Lines (Signups: [20,35,45,30,65,85,55], Bookings: [10,25,30,15,48,70,40], Points: [15,22,35,28,50,68,48]) */}
-            {/* Signups Path */}
-            <path
-              d="M 70 160 Q 150 137.5 150 135 T 230 120 T 310 142.5 T 390 90 T 470 60 T 550 105"
-              fill="none"
-              stroke="#4A90D9"
-              strokeWidth="3.5"
-            />
-            <path
-              d="M 70 160 Q 150 137.5 150 135 T 230 120 T 310 142.5 T 390 90 T 470 60 T 550 105 L 550 170 L 70 170 Z"
-              fill="url(#blueGrad)"
-            />
+            {chartData.length > 0 && (
+              <>
+                {/* Signups Paths */}
+                <path d={getPointsPath('signups')} fill="none" stroke="#4A90D9" strokeWidth="3.5" />
+                <path d={getAreaPath('signups')} fill="url(#blueGrad)" />
 
-            {/* Bookings Path */}
-            <path
-              d="M 70 170 Q 150 152.5 150 150 T 230 142.5 T 310 165 T 390 115 T 470 82.5 T 550 127.5"
-              fill="none"
-              stroke="#E8576D"
-              strokeWidth="3.5"
-            />
-            <path
-              d="M 70 170 Q 150 152.5 150 150 T 230 142.5 T 310 165 T 390 115 T 470 82.5 T 550 127.5 L 550 170 L 70 170 Z"
-              fill="url(#pinkGrad)"
-            />
+                {/* Bookings Paths */}
+                <path d={getPointsPath('bookings')} fill="none" stroke="#E8576D" strokeWidth="3.5" />
+                <path d={getAreaPath('bookings')} fill="url(#pinkGrad)" />
 
-            {/* Points Path */}
-            <path
-              d="M 70 162.5 Q 150 157.5 150 151 T 230 135 T 310 145 T 390 112.5 T 470 85 T 550 115"
-              fill="none"
-              stroke="#F5C842"
-              strokeWidth="2.5"
-              strokeDasharray="4 2"
-            />
+                {/* Points Path */}
+                <path d={getPointsPath('points')} fill="none" stroke="#F5C842" strokeWidth="2.5" strokeDasharray="4 2" />
 
-            {/* Hover Circles */}
-            <circle cx="470" cy="60" r="5" fill="#4A90D9" stroke="#fff" strokeWidth="1.5" />
-            <circle cx="470" cy="82.5" r="5" fill="#E8576D" stroke="#fff" strokeWidth="1.5" />
-            <circle cx="470" cy="85" r="4" fill="#F5C842" stroke="#fff" strokeWidth="1.5" />
+                {/* Data point markers */}
+                {chartData.map((d, i) => {
+                  const x = 70 + i * 80;
+                  const yS = 170 - (Math.min(100, d.signups * 10) / 100) * 150;
+                  const yB = 170 - (Math.min(100, d.bookings * 10) / 100) * 150;
+                  const yP = 170 - (Math.min(100, d.points / 10) / 100) * 150;
+                  return (
+                    <g key={i}>
+                      <circle cx={x} cy={yS} r="4.5" fill="#4A90D9" stroke="#fff" strokeWidth="1.5" title={`Signups: ${d.signups}`} />
+                      <circle cx={x} cy={yB} r="4.5" fill="#E8576D" stroke="#fff" strokeWidth="1.5" title={`Bookings: ${d.bookings}`} />
+                      <circle cx={x} cy={yP} r="3.5" fill="#F5C842" stroke="#fff" strokeWidth="1.5" title={`Points: ${d.points}`} />
+                    </g>
+                  );
+                })}
+              </>
+            )}
           </svg>
         </div>
       </div>
