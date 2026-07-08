@@ -4101,23 +4101,42 @@ img {
   .section-pink,
   .section-dark,
   .section-white,
-  .section-off-white { padding: 56px 0; }
+  .section-off-white { padding: 64px 0; }
+
 
   /* ── HERO ──────────────────────────────────── */
   .hero-section {
-    min-height: calc(100vh - 54px - 80px);
-    padding: 32px 20px 48px;
+    min-height: calc(100svh - 54px - 64px); /* full screen between top & bottom nav */
+    height: calc(100svh - 54px - 64px);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .hero-inner { min-height: auto; }
+  .hero-inner {
+    min-height: 100%;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
 
-  .hero-title { font-size: clamp(2.6rem, 13vw, 4.5rem); }
+  /* Big bold title fills the screen */
+  .hero-title {
+    font-size: clamp(3.2rem, 16vw, 5.5rem);
+    text-align: center;
+    line-height: 1.05;
+    z-index: 2;
+  }
 
-  /* Stickers: smaller + stay in corners */
-  .sticker-heart     { width: 64px !important; top: 8% !important;  left: 3% !important; }
-  .sticker-lightning { width: 60px !important; top: 8% !important;  right: 3% !important; }
-  .sticker-hand      { width: 80px !important; bottom: 6% !important; left: 3% !important; }
-  .sticker-rocket    { width: 80px !important; bottom: 6% !important; right: 3% !important; }
+  /* Stickers: bigger and well-placed around the title */
+  .sticker-heart     { width: 72px !important;  top: 12% !important;   left: 2% !important; }
+  .sticker-lightning { width: 68px !important;  top: 10% !important;   right: 2% !important; }
+  .sticker-hand      { width: 90px !important;  bottom: 10% !important; left: 2% !important; }
+  .sticker-rocket    { width: 90px !important;  bottom: 8% !important;  right: 2% !important; }
 
   /* ── ABOUT ─────────────────────────────────── */
   .about-section       { flex-direction: column; gap: 28px; }
