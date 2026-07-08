@@ -59,7 +59,7 @@ function ScratchCard({ user, profile, refetchProfile }) {
   const canvasRef = useRef(null);
   const { showToast, triggerConfetti } = useToast();
   const [revealed, setRevealed] = useState(false);
-  const [hasCheckedToday, setHasCheckedToday] = useState(false);
+  const [prizePts, setPrizePts] = useState(null);
   const [loading, setLoading] = useState(false);
   const isDrawing = useRef(false);
 
@@ -118,15 +118,21 @@ function ScratchCard({ user, profile, refetchProfile }) {
     }
   }
 
-  async function handleAwardPoints() {
+  async function handleAwardPoints(awardedPoints) {
     if (!user || loading) return;
+
+    if (awardedPoints === 0) {
+      showToast('🍀 Better luck next time! Try again tomorrow.', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const { error: txnErr } = await supabase
         .from('point_transactions')
         .insert({
           user_id: user.id,
-          delta: 25,
+          delta: awardedPoints,
           reason: 'scratch_win',
         });
 
@@ -134,14 +140,14 @@ function ScratchCard({ user, profile, refetchProfile }) {
         const currentPoints = profile?.total_points || 0;
         await supabase
           .from('profiles')
-          .update({ total_points: currentPoints + 25 })
+          .update({ total_points: currentPoints + awardedPoints })
           .eq('id', user.id);
 
         if (refetchProfile) await refetchProfile();
         
         playSuccessSound();
         triggerConfetti();
-        showToast('🎉 Scratch Card Success! +25 Points added.', 'success');
+        showToast(`🎉 Scratch Card Success! +${awardedPoints} Points added.`, 'success');
       } else {
         showToast(txnErr.message, 'error');
       }
@@ -169,6 +175,14 @@ function ScratchCard({ user, profile, refetchProfile }) {
       showToast('Please log in first to scratch cards!', 'error');
       return;
     }
+
+    // Determine the prize points when scratch begins
+    if (prizePts === null) {
+      const rand = Math.random();
+      const points = rand < 0.4 ? 0 : Math.floor(Math.random() * 5) + 1; // 40% fail, 60% win (1 to 5)
+      setPrizePts(points);
+    }
+
     isDrawing.current = true;
     handleDraw(e);
   }
@@ -207,7 +221,11 @@ function ScratchCard({ user, profile, refetchProfile }) {
     const percent = transparent / (canvas.width * canvas.height);
     if (percent > 0.48) {
       setRevealed(true);
-      handleAwardPoints();
+      // Wait for state to catch up if needed, or pass current points value directly
+      const rand = Math.random();
+      const points = prizePts !== null ? prizePts : (rand < 0.4 ? 0 : Math.floor(Math.random() * 5) + 1);
+      setPrizePts(points);
+      handleAwardPoints(points);
     }
   }
 
@@ -230,8 +248,17 @@ function ScratchCard({ user, profile, refetchProfile }) {
       >
         {/* Hidden prize text */}
         <div style={{ textAlign: 'center', pointerEvents: 'none' }}>
-          <div className="font-bungee" style={{ color: '#F5C842', fontSize: '1.2rem', marginBottom: 4 }}>🎉 +25 POINTS!</div>
-          <div style={{ color: '#fff', fontSize: '0.75rem', opacity: 0.8 }}>BONUS CREDITED</div>
+          {prizePts > 0 ? (
+            <>
+              <div className="font-bungee" style={{ color: '#F5C842', fontSize: '1.25rem', marginBottom: 4 }}>🎉 +{prizePts} POINTS!</div>
+              <div style={{ color: '#fff', fontSize: '0.75rem', opacity: 0.8 }}>BONUS CREDITED</div>
+            </>
+          ) : (
+            <>
+              <div className="font-bungee" style={{ color: '#E8576D', fontSize: '1.15rem', marginBottom: 4 }}>🍀 BETTER LUCK</div>
+              <div style={{ color: '#fff', fontSize: '0.75rem', opacity: 0.8 }}>TRY AGAIN TOMORROW!</div>
+            </>
+          )}
         </div>
 
         {/* Canvas overlay */}

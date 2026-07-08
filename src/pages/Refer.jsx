@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Info, Copy, Check } from 'lucide-react';
+import { Info, Copy, Check, Trophy, Lock, Gift } from 'lucide-react';
 import Footer from '../components/layout/Footer';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function Refer() {
-  const { user, profile } = useAuth();
+  const { user, profile, refetchProfile } = useAuth();
+  const { showToast, triggerConfetti } = useToast();
   const [copied, setCopied] = useState(false);
   const [referrals, setReferrals] = useState([]);
+  const [claimedMilestones, setClaimedMilestones] = useState([]);
+  const [claimingId, setClaimingId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const referralCode = profile?.referral_code || '…';
@@ -16,16 +20,62 @@ export default function Refer() {
   useEffect(() => {
     async function load() {
       if (!user) return;
-      const { data } = await supabase
-        .from('referrals')
-        .select('*, referred:referred_id(full_name, avatar_url, created_at)')
-        .eq('referrer_id', user.id)
-        .order('created_at', { ascending: false });
-      setReferrals(data || []);
+      
+      const [{ data: refsData }, { data: claimsData }] = await Promise.all([
+        supabase
+          .from('referrals')
+          .select('*, referred:referred_id(full_name, avatar_url, created_at)')
+          .eq('referrer_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('point_transactions')
+          .select('reason')
+          .eq('user_id', user.id)
+          .in('reason', ['milestone_referral_3', 'milestone_referral_5', 'milestone_referral_10'])
+      ]);
+
+      setReferrals(refsData || []);
+      setClaimedMilestones((claimsData || []).map(c => c.reason));
       setLoading(false);
     }
     load();
   }, [user]);
+
+  async function handleClaimMilestone(req, points) {
+    if (!user || claimingId) return;
+    setClaimingId(req);
+    const reason = `milestone_referral_${req}`;
+    try {
+      // 1. Insert point transaction
+      const { error: txnErr } = await supabase
+        .from('point_transactions')
+        .insert({
+          user_id: user.id,
+          delta: points,
+          reason: reason,
+        });
+
+      if (!txnErr) {
+        const currentPoints = profile?.total_points || 0;
+        
+        // 2. Add points to profile
+        await supabase
+          .from('profiles')
+          .update({ total_points: currentPoints + points })
+          .eq('id', user.id);
+
+        setClaimedMilestones(prev => [...prev, reason]);
+        triggerConfetti();
+        showToast(`🎉 Milestone Unlocked! +${points} Points claimed.`, 'success');
+        if (refetchProfile) await refetchProfile();
+      } else {
+        showToast(txnErr.message, 'error');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setClaimingId(null);
+  }
 
   function handleCopy() {
     navigator.clipboard.writeText(referralLink);
@@ -85,7 +135,88 @@ export default function Refer() {
             </div>
           </div>
 
-          <div className="referral-info">
+          {/* Referral Milestones Progress Section */}
+          <div className="referral-milestones-card" style={{ marginTop: 30, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '24px 20px', textAlign: 'left' }}>
+            <h3 className="font-bungee" style={{ fontSize: '1.05rem', color: 'var(--yellow)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <Trophy size={18} /> REFERRAL MILESTONES
+            </h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', marginBottom: 20 }}>
+              Unlock bonus points by introducing new creators to the squad. Current referrals: <strong>{referrals.length}</strong>
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 14 }}>
+              {/* Milestone 3 */}
+              <div style={{ background: '#0c0c1b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', minHeight: 140 }}>
+                <span style={{ fontSize: '1.6rem' }}>🥉</span>
+                <span className="font-bungee" style={{ fontSize: '0.82rem', margin: '6px 0 2px', color: '#fff' }}>BRONZE LEVEL</span>
+                <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>3 Referrals (+100 pts)</span>
+                {claimedMilestones.includes('milestone_referral_3') ? (
+                  <span style={{ color: '#4CAF50', fontWeight: 800, fontSize: '0.8rem' }}>✅ CLAIMED</span>
+                ) : referrals.length >= 3 ? (
+                  <button 
+                    className="admin-btn admin-btn-pink font-bungee" 
+                    style={{ fontSize: '0.68rem', padding: '6px 12px' }}
+                    onClick={() => handleClaimMilestone(3, 100)}
+                    disabled={claimingId !== null}
+                  >
+                    {claimingId === 3 ? '...' : 'CLAIM'}
+                  </button>
+                ) : (
+                  <span style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem' }}>
+                    <Lock size={11} /> Locked
+                  </span>
+                )}
+              </div>
+
+              {/* Milestone 5 */}
+              <div style={{ background: '#0c0c1b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', minHeight: 140 }}>
+                <span style={{ fontSize: '1.6rem' }}>🥈</span>
+                <span className="font-bungee" style={{ fontSize: '0.82rem', margin: '6px 0 2px', color: '#fff' }}>SILVER LEVEL</span>
+                <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>5 Referrals (+250 pts)</span>
+                {claimedMilestones.includes('milestone_referral_5') ? (
+                  <span style={{ color: '#4CAF50', fontWeight: 800, fontSize: '0.8rem' }}>✅ CLAIMED</span>
+                ) : referrals.length >= 5 ? (
+                  <button 
+                    className="admin-btn admin-btn-pink font-bungee" 
+                    style={{ fontSize: '0.68rem', padding: '6px 12px' }}
+                    onClick={() => handleClaimMilestone(5, 250)}
+                    disabled={claimingId !== null}
+                  >
+                    {claimingId === 5 ? '...' : 'CLAIM'}
+                  </button>
+                ) : (
+                  <span style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem' }}>
+                    <Lock size={11} /> Locked
+                  </span>
+                )}
+              </div>
+
+              {/* Milestone 10 */}
+              <div style={{ background: '#0c0c1b', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', minHeight: 140 }}>
+                <span style={{ fontSize: '1.6rem' }}>🥇</span>
+                <span className="font-bungee" style={{ fontSize: '0.82rem', margin: '6px 0 2px', color: '#fff' }}>GOLD LEVEL</span>
+                <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>10 Referrals (+500 pts)</span>
+                {claimedMilestones.includes('milestone_referral_10') ? (
+                  <span style={{ color: '#4CAF50', fontWeight: 800, fontSize: '0.8rem' }}>✅ CLAIMED</span>
+                ) : referrals.length >= 10 ? (
+                  <button 
+                    className="admin-btn admin-btn-pink font-bungee" 
+                    style={{ fontSize: '0.68rem', padding: '6px 12px' }}
+                    onClick={() => handleClaimMilestone(10, 500)}
+                    disabled={claimingId !== null}
+                  >
+                    {claimingId === 10 ? '...' : 'CLAIM'}
+                  </button>
+                ) : (
+                  <span style={{ color: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem' }}>
+                    <Lock size={11} /> Locked
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="referral-info" style={{ marginTop: 24 }}>
             <Info size={18} />
             <span>People that used your referral code to sign up are listed below. You earn a cut every time they complete an offer.</span>
           </div>
