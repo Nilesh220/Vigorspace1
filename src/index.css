@@ -2877,6 +2877,41 @@ img {
   transition: background-color 0.4s ease;
 }
 
+/* Desktop-only scattered section */
+.rewards-desktop { display: flex; }   /* shown on desktop */
+
+/* Mobile-only grid section — hidden on desktop */
+.rewards-mobile {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 56px;
+}
+
+.rewards-mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.rewards-mobile-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 10px;
+  aspect-ratio: 1;
+  transition: transform 0.2s;
+}
+
+.rewards-mobile-card:hover {
+  transform: scale(1.05);
+}
+
+
 .rs-center {
   max-width: 600px;
   text-align: center;
@@ -4094,27 +4129,9 @@ img {
   .hiw-step     { width: 100% !important; }
 
   /* ── REWARDS SCATTERED ─────────────────────── */
-  /* Force stacked / collapsed mode on mobile — no absolute positioning mess */
-  .rewards-scattered-section {
-    min-height: 380px !important;
-    padding: 48px 20px !important;
-  }
-  /* All cards pile up centred like the stacked desktop state */
-  .rs-card {
-    width: 140px !important;
-    height: 140px !important;
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-  }
-  .rs-amazon  { transform: translate(-50%, -50%) rotate(-10deg) !important; z-index: 6 !important; opacity: 1 !important; }
-  .rs-swiggy  { transform: translate(-50%, -50%) rotate(6deg)  !important; z-index: 5 !important; opacity: 1 !important; }
-  .rs-gplay   { transform: translate(-50%, -50%) rotate(-3deg) !important; z-index: 4 !important; opacity: 1 !important; }
-  .rs-myntra  { transform: translate(-50%, -50%) rotate(12deg) !important; z-index: 3 !important; opacity: 1 !important; }
-  .rs-spotify { transform: translate(-50%, -50%) rotate(-6deg) !important; z-index: 2 !important; opacity: 1 !important; }
-  .rs-netflix { transform: translate(-50%, -50%) rotate(4deg)  !important; z-index: 1 !important; opacity: 1 !important; }
-  /* Hide the centre text/button in stacked mobile view */
-  .rs-center  { display: none !important; }
+  /* On mobile: hide the broken absolute-positioned scatter, show the grid instead */
+  .rewards-desktop { display: none !important; }
+  .rewards-mobile  { display: flex !important; }
 
   /* ── EVENTS ────────────────────────────────── */
   /* Stack cards vertically */

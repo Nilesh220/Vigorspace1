@@ -124,25 +124,15 @@ export default function Home() {
       </section>
 
       {/* ── SECTION 4: UNLOCK REWARDS ────────────────────────── */}
+      {/* ── Desktop: animated scatter / stack ─────────────── */}
       <section
-        className={`section-pink rewards-scattered-section ${rewardsExpanded ? 'expanded' : 'stacked'}`}
+        className={`section-pink rewards-scattered-section rewards-desktop ${rewardsExpanded ? 'expanded' : 'stacked'}`}
         onClick={() => setRewardsExpanded(!rewardsExpanded)}
         style={{ cursor: 'pointer' }}
       >
-        {/* Amazon */}
-        <div className="rs-card rs-amazon">
-          <BrandCard src={logoAmazon} alt="Amazon" size={130} />
-        </div>
-        {/* Swiggy */}
-        <div className="rs-card rs-swiggy">
-          <BrandCard src={logoSwiggy} alt="Swiggy" size={130} />
-        </div>
-        {/* Google Play */}
-        <div className="rs-card rs-gplay">
-          <BrandCard src={logoGooglePlay} alt="Google Play" size={130} />
-        </div>
-
-        {/* Center text */}
+        <div className="rs-card rs-amazon"><BrandCard src={logoAmazon} alt="Amazon" size={130} /></div>
+        <div className="rs-card rs-swiggy"><BrandCard src={logoSwiggy} alt="Swiggy" size={130} /></div>
+        <div className="rs-card rs-gplay"><BrandCard src={logoGooglePlay} alt="Google Play" size={130} /></div>
         <div className="rs-center">
           <h2 className="rewards-home-title font-bungee">UNLOCK REWARDS</h2>
           <p className="rewards-home-desc">
@@ -150,20 +140,35 @@ export default function Home() {
             Choose from popular brands and indulge in your favorite treats or experiences.
           </p>
         </div>
+        <div className="rs-card rs-myntra"><BrandCard src={logoMyntra} alt="Myntra" size={130} /></div>
+        <div className="rs-card rs-spotify"><BrandCard src={logoSpotify} alt="Spotify" size={130} /></div>
+        <div className="rs-card rs-netflix"><BrandCard src={logoNetflix} alt="Netflix" size={130} /></div>
+      </section>
 
-        {/* Myntra */}
-        <div className="rs-card rs-myntra">
-          <BrandCard src={logoMyntra} alt="Myntra" size={130} />
+      {/* ── Mobile: clean grid of brand cards ──────────────── */}
+      <section className="section-pink rewards-mobile">
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <h2 className="rewards-home-title font-bungee" style={{ fontSize: 'clamp(1.8rem,8vw,2.8rem)', color:'#fff' }}>UNLOCK REWARDS</h2>
+          <p style={{ color:'rgba(255,255,255,0.85)', fontSize:'0.85rem', marginTop: 8, lineHeight: 1.6, padding:'0 8px' }}>
+            Discover a world of possibilities with our diverse range of gift cards.
+          </p>
         </div>
-        {/* Spotify */}
-        <div className="rs-card rs-spotify">
-          <BrandCard src={logoSpotify} alt="Spotify" size={130} />
-        </div>
-        {/* Netflix */}
-        <div className="rs-card rs-netflix">
-          <BrandCard src={logoNetflix} alt="Netflix" size={130} />
+        <div className="rewards-mobile-grid">
+          {[
+            { src: logoAmazon, alt: 'Amazon' },
+            { src: logoSwiggy, alt: 'Swiggy' },
+            { src: logoSpotify, alt: 'Spotify' },
+            { src: logoMyntra, alt: 'Myntra' },
+            { src: logoGooglePlay, alt: 'Google Play' },
+            { src: logoNetflix, alt: 'Netflix' },
+          ].map(({ src, alt }) => (
+            <div key={alt} className="rewards-mobile-card">
+              <BrandCard src={src} alt={alt} size={100} />
+            </div>
+          ))}
         </div>
       </section>
+
 
 
       {/* ── SECTION 5: EVENTS ────────────────────────────────── */}
