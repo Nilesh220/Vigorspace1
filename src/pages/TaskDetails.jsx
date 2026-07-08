@@ -117,7 +117,7 @@ export default function TaskDetails() {
 
   return (
     <div className="task-detail-page">
-      <div style={{ padding: '30px 60px' }}>
+      <div className="task-detail-container">
         {/* Task Image */}
         <div className="task-detail-image">
           {task.image_url ? (

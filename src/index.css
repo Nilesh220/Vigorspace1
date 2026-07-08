@@ -1936,6 +1936,17 @@ img {
   min-height: 100vh;
 }
 
+.task-detail-container {
+  padding: 30px 60px;
+}
+
+@media (max-width: 768px) {
+  .task-detail-container {
+    padding: 20px 16px;
+  }
+}
+
+
 .task-detail-image {
   width: 100%;
   max-width: 700px;
@@ -4479,234 +4490,7 @@ img {
 }
 
 
-/* ═══════════════════════════════════════════════════════════════
-   FULL MOBILE RESPONSIVE OVERRIDES
-   Breakpoint: 768px and below
-   ═══════════════════════════════════════════════════════════════ */
 
-@media (max-width: 768px) {
-
-  /* Show mobile nav, hide desktop sidebar */
-  .sidebar { display: none !important; }
-  .mobile-topbar { display: flex; }
-  .mobile-bottom-nav { display: flex; }
-
-  /* Main content: remove sidebar margin, add top + bottom padding */
-  .main-content {
-    margin-left: 0 !important;
-    padding-top: 56px;
-    padding-bottom: 80px;
-  }
-
-  /* Topbar: reposition for mobile (it sits below mobile-topbar) */
-  .topbar {
-    left: 0 !important;
-    top: 56px !important;
-    padding: 10px 16px;
-  }
-
-  /* Container padding */
-  .container { padding: 0 20px; }
-
-  /* Section padding */
-  .section-pink,
-  .section-dark,
-  .section-white,
-  .section-off-white { padding: 60px 0; }
-
-  /* ── HERO ────────────────────────────────────── */
-  .hero-section {
-    min-height: auto;
-    padding: 48px 20px 60px;
-  }
-
-  .hero-inner {
-    min-height: auto;
-    padding: 0;
-  }
-
-  .hero-title {
-    font-size: clamp(2.4rem, 12vw, 4rem);
-  }
-
-  /* Shrink stickers on mobile */
-  .sticker-heart    { width: 60px !important; top: 10% !important; left: 2% !important; }
-  .sticker-hand     { width: 75px !important; bottom: 8% !important; left: 2% !important; }
-  .sticker-rocket   { width: 75px !important; bottom: 8% !important; right: 2% !important; }
-  .sticker-lightning{ width: 55px !important; top: 8% !important; right: 2% !important; }
-
-  /* ── ABOUT SECTION ───────────────────────────── */
-  .about-section {
-    flex-direction: column;
-    gap: 32px;
-  }
-
-  .about-content { min-width: unset; }
-
-  .about-image-frame {
-    width: 100%;
-    height: 260px;
-  }
-
-  /* ── HOW IT WORKS ────────────────────────────── */
-  .hiw-steps {
-    flex-direction: column !important;
-    gap: 20px !important;
-  }
-
-  .hiw-step { width: 100% !important; }
-
-  /* ── REWARDS SCATTERED ───────────────────────── */
-  .rewards-scattered-section {
-    min-height: auto !important;
-    padding: 40px 16px !important;
-  }
-
-  .rs-card {
-    width: 100px !important;
-    height: 100px !important;
-  }
-
-  /* Re-stack brand cards on mobile */
-  .rs-card:nth-child(1) { top: -110px !important; left: -50px !important; }
-  .rs-card:nth-child(2) { top: -110px !important; right: -50px !important; left: auto !important; }
-  .rs-card:nth-child(3) { left: -100px !important; top: 0 !important; }
-  .rs-card:nth-child(4) { right: -100px !important; left: auto !important; top: 0 !important; }
-  .rs-card:nth-child(5) { bottom: -110px !important; left: -50px !important; top: auto !important; }
-  .rs-card:nth-child(6) { bottom: -110px !important; right: -50px !important; left: auto !important; top: auto !important; }
-
-  .rs-center { max-width: 260px !important; }
-
-  /* ── EVENTS SECTION ──────────────────────────── */
-  .events-cards-row {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 20px !important;
-  }
-
-  .event-card {
-    width: 100% !important;
-    max-width: 360px !important;
-  }
-
-  /* ── SOCIAL FEED ─────────────────────────────── */
-  .social-feed-row {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 20px !important;
-  }
-
-  /* ── FAQ ─────────────────────────────────────── */
-  .faq-section { padding: 40px 0 !important; }
-
-  /* ── CONTACT PAGE ────────────────────────────── */
-  .contact-body {
-    flex-direction: column;
-    padding: 20px 20px 80px;
-    gap: 32px;
-  }
-
-  .contact-sticker {
-    display: none;
-  }
-
-  .contact-right {
-    padding: 24px 20px;
-  }
-
-  /* ── FOOTER ──────────────────────────────────── */
-  .footer-grid {
-    flex-direction: column !important;
-    gap: 32px !important;
-  }
-
-  /* ── AUTH PAGES ──────────────────────────────── */
-  .auth-page { flex-direction: column; }
-  .auth-brand-panel {
-    width: 100% !important;
-    padding: 32px 24px !important;
-    min-height: 200px !important;
-  }
-  .auth-form-panel { padding: 28px 20px !important; }
-
-  /* ── PROFILE / LEADERBOARD / EARN ───────────── */
-  .profile-header {
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 16px !important;
-  }
-
-  .profile-stats {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  .earn-tasks-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .leaderboard-table-wrap {
-    overflow-x: auto;
-  }
-
-  /* ── SECTION TITLES ──────────────────────────── */
-  .section-title {
-    font-size: clamp(2rem, 9vw, 3rem);
-  }
-
-  .section-subtitle { font-size: 1.2rem; }
-
-  /* ── REWARDS PAGE ────────────────────────────── */
-  .rewards-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
-  }
-
-  /* ── REFER PAGE ──────────────────────────────── */
-  .refer-hero { padding: 40px 20px !important; }
-  .refer-steps { flex-direction: column !important; }
-
-  /* ── GENERIC ──────────────────────────────────── */
-  .two-col-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  h1, h2, h3 { word-break: break-word; }
-}
-
-/* ── Tablet: 769–1024px ─────────────────────── */
-@media (min-width: 769px) and (max-width: 1024px) {
-
-  :root { --sidebar-width: 110px; }
-
-  .sidebar-nav-item span { font-size: 0.72rem; }
-
-  .hero-title { font-size: clamp(3rem, 7vw, 5rem); }
-
-  .about-image-frame { width: 300px; height: 340px; }
-
-  .rewards-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-
-  .events-cards-row {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-  }
-
-  .event-card { width: 280px !important; }
-}
-
-/* ── Extra small phones ─────────────────────── */
-@media (max-width: 380px) {
-
-  .hero-title { font-size: clamp(2rem, 13vw, 3rem); }
-
-  .rewards-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .mobile-bottom-item { padding: 6px 10px; font-size: 0.6rem; }
-}
 
 
 
