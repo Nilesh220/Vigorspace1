@@ -12,17 +12,25 @@ export default function Events() {
 
   useEffect(() => {
     async function fetchEvents() {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('is_active', true)
-        .order('event_date', { ascending: true });
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .eq('is_active', true)
+          .order('event_date', { ascending: true });
 
-      if (!error) {
-        setEvents(data || []);
-        if (data && data.length > 0) {
-          setSelectedEvent(data[0]); // default select the first event as featured
+        if (!error) {
+          setEvents(data || []);
+          if (data && data.length > 0) {
+            setSelectedEvent(data[0]); // default select the first event as featured
+          }
         }
+      } catch (err) {
+        console.error('Failed to load events from Supabase:', err);
       }
       setLoading(false);
     }

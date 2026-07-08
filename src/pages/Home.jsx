@@ -55,12 +55,17 @@ export default function Home() {
 
   useEffect(() => {
     async function loadData() {
-      const [{ data: eventsData }, { data: storiesData }] = await Promise.all([
-        supabase.from('events').select('*').eq('is_active', true).order('event_date', { ascending: true }).limit(3),
-        supabase.from('stories').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(4),
-      ]);
-      if (eventsData) setEvents(eventsData);
-      if (storiesData) setStories(storiesData);
+      if (!supabase) return;
+      try {
+        const [{ data: eventsData }, { data: storiesData }] = await Promise.all([
+          supabase.from('events').select('*').eq('is_active', true).order('event_date', { ascending: true }).limit(3),
+          supabase.from('stories').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(4),
+        ]);
+        if (eventsData) setEvents(eventsData);
+        if (storiesData) setStories(storiesData);
+      } catch (err) {
+        console.error('Failed to load events/stories from Supabase:', err);
+      }
     }
     loadData();
   }, []);
