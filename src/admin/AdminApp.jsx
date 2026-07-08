@@ -1,17 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import AdminLayout from './AdminLayout';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminUsers from './pages/AdminUsers';
-import AdminTasks from './pages/AdminTasks';
-import AdminSubmissions from './pages/AdminSubmissions';
-import AdminRewards from './pages/AdminRewards';
-import AdminRedemptions from './pages/AdminRedemptions';
-import AdminMessages from './pages/AdminMessages';
-import AdminEvents from './pages/AdminEvents';
-import AdminStories from './pages/AdminStories';
-import AdminBookings from './pages/AdminBookings';
+
+// Lazy load admin pages
+const AdminDashboard   = lazy(() => import('./pages/AdminDashboard'));
+const AdminUsers       = lazy(() => import('./pages/AdminUsers'));
+const AdminTasks       = lazy(() => import('./pages/AdminTasks'));
+const AdminSubmissions = lazy(() => import('./pages/AdminSubmissions'));
+const AdminRewards     = lazy(() => import('./pages/AdminRewards'));
+const AdminRedemptions = lazy(() => import('./pages/AdminRedemptions'));
+const AdminMessages    = lazy(() => import('./pages/AdminMessages'));
+const AdminEvents      = lazy(() => import('./pages/AdminEvents'));
+const AdminStories     = lazy(() => import('./pages/AdminStories'));
+const AdminBookings    = lazy(() => import('./pages/AdminBookings'));
+
+function AdminLoader() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0', background: 'transparent' }}>
+      <div className="spinner" />
+    </div>
+  );
+}
 
 export default function AdminApp() {
   const [checking, setChecking] = useState(true);
@@ -52,20 +62,22 @@ export default function AdminApp() {
   }
 
   return (
-    <Routes>
-      <Route element={<AdminLayout />}>
-        <Route index element={<AdminDashboard />} />
-        <Route path="users" element={<AdminUsers />} />
-        <Route path="tasks" element={<AdminTasks />} />
-        <Route path="submissions" element={<AdminSubmissions />} />
-        <Route path="rewards" element={<AdminRewards />} />
-        <Route path="redemptions" element={<AdminRedemptions />} />
-        <Route path="events" element={<AdminEvents />} />
-        <Route path="stories" element={<AdminStories />} />
-        <Route path="bookings" element={<AdminBookings />} />
-        <Route path="messages" element={<AdminMessages />} />
-        <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Route>
-    </Routes>
+    <Suspense fallback={<AdminLoader />}>
+      <Routes>
+        <Route element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="tasks" element={<AdminTasks />} />
+          <Route path="submissions" element={<AdminSubmissions />} />
+          <Route path="rewards" element={<AdminRewards />} />
+          <Route path="redemptions" element={<AdminRedemptions />} />
+          <Route path="events" element={<AdminEvents />} />
+          <Route path="stories" element={<AdminStories />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="messages" element={<AdminMessages />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }
