@@ -3766,12 +3766,10 @@ img {
   top: 0; left: 0; right: 0;
   height: 54px;
   background: var(--pink);
-  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 18px;
   z-index: 110;
-  /* Subtle bottom line */
   box-shadow: 0 1px 0 rgba(0,0,0,0.08);
 }
 
@@ -3858,7 +3856,6 @@ img {
   height: 64px;
   background: var(--dark);
   border-top: 1px dashed rgba(255,255,255,0.12);
-  display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: 110;
