@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, ClipboardList, CheckSquare, Gift, ShoppingBag, MessageSquare, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, CheckSquare, Gift, ShoppingBag, MessageSquare, LogOut, Menu, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import vigorLogo from '../assets/Group.png';
 
@@ -14,6 +15,8 @@ const navItems = [
 ];
 
 export default function AdminLayout() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   async function handleLogout() {
     if (supabase) await supabase.auth.signOut();
     window.location.href = '/';
@@ -21,7 +24,18 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      {/* Sidebar */}
+      {/* Mobile Top Bar */}
+      <header className="admin-mob-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src={vigorLogo} alt="Vigor Space" style={{ height: 28 }} />
+          <span className="admin-badge font-bungee">ADMIN</span>
+        </div>
+        <button className="admin-mob-toggle" onClick={() => setMobileOpen(true)} aria-label="Open Menu">
+          <Menu size={22} />
+        </button>
+      </header>
+
+      {/* Sidebar (Desktop view, fixed on left) */}
       <aside className="admin-sidebar">
         <div className="admin-logo">
           <img src={vigorLogo} alt="Vigor Space" style={{ width: 100 }} />
@@ -48,7 +62,44 @@ export default function AdminLayout() {
         </button>
       </aside>
 
-      {/* Main */}
+      {/* Mobile Drawer (Overlay when open) */}
+      {mobileOpen && (
+        <div className="admin-mob-overlay" onClick={() => setMobileOpen(false)}>
+          <aside className="admin-mob-drawer" onClick={e => e.stopPropagation()}>
+            <div className="admin-mob-drawer-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <img src={vigorLogo} alt="Vigor Space" style={{ height: 28 }} />
+                <span className="admin-badge font-bungee">ADMIN</span>
+              </div>
+              <button className="admin-mob-close" onClick={() => setMobileOpen(false)}>
+                <X size={22} />
+              </button>
+            </div>
+
+            <nav className="admin-mob-nav">
+              {navItems.map(({ to, label, icon: Icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={({ isActive }) => `admin-nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </nav>
+
+            <button className="admin-nav-item admin-logout" style={{ margin: 'auto 16px 16px' }} onClick={handleLogout}>
+              <LogOut size={18} />
+              <span>Sign Out</span>
+            </button>
+          </aside>
+        </div>
+      )}
+
+      {/* Main Container */}
       <main className="admin-main">
         <Outlet />
       </main>
