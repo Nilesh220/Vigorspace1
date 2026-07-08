@@ -8,8 +8,8 @@ export default function AppShell() {
   const navigate = useNavigate();
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'You';
-  const avatarSeed = profile?.full_name || user?.id || 'default';
-  const avatarUrl = profile?.avatar_url ||
+  const avatarSeed  = profile?.full_name || user?.id || 'default';
+  const avatarUrl   = profile?.avatar_url ||
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(avatarSeed)}`;
 
   async function handleSignOut() {
@@ -20,8 +20,10 @@ export default function AppShell() {
   return (
     <div className="app-shell">
       <Sidebar />
+
       <div className="main-content">
-        <div className="topbar">
+        {/* Desktop-only top bar */}
+        <div className="topbar desktop-only-topbar">
           <div
             className="user-badge"
             title={user?.email}
@@ -56,6 +58,7 @@ export default function AppShell() {
             </button>
           )}
         </div>
+
         <Outlet />
       </div>
     </div>
