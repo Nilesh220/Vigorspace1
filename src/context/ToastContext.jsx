@@ -181,7 +181,7 @@ export function ToastProvider({ children }) {
       {/* Daily Streak Claim animation Modal popup */}
       {streakClaim && (
         <div className="booking-popup-overlay" style={{ zIndex: 10000 }}>
-          <div className="booking-popup-card" style={{ width: 'min(92vw, 440px)', padding: '28px 24px', textAlign: 'center', border: '2.5px solid var(--yellow)', boxShadow: '0 0 30px rgba(245, 200, 66, 0.45)' }}>
+          <div className="booking-popup-card" style={{ width: 'min(92vw, 440px)', padding: '28px 24px', textAlign: 'center', border: '2px solid var(--pink)', boxShadow: '0 12px 40px rgba(0, 0, 0, 0.7)' }}>
             <button 
               className="insta-control-btn" 
               style={{ position: 'absolute', top: 16, right: 16, color: 'rgba(255,255,255,0.4)' }} 
@@ -190,8 +190,8 @@ export function ToastProvider({ children }) {
               <X size={20} />
             </button>
 
-            <h3 className="font-bungee" style={{ color: 'var(--yellow)', fontSize: '1.25rem', letterSpacing: '0.5px', marginBottom: 4 }}>
-              DAILY STREAK ACTIVE!
+            <h3 className="font-bungee" style={{ color: 'var(--pink)', fontSize: '1.25rem', letterSpacing: '0.5px', marginBottom: 4 }}>
+              DAILY STREAK CLAIMED!
             </h3>
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8rem', marginBottom: 20 }}>
               Logged in successfully. Day {streakClaim.streakDays} claimed!
@@ -210,7 +210,7 @@ export function ToastProvider({ children }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 0 16px rgba(76, 175, 80, 0.4)',
+                  boxShadow: 'none',
                   animation: 'tickPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                 }}
               >
@@ -228,18 +228,18 @@ export function ToastProvider({ children }) {
                   <div 
                     key={i} 
                     style={{
-                      background: isCurrent ? 'rgba(245, 200, 66, 0.12)' : isClaimed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255,255,255,0.03)',
-                      border: isCurrent ? '1.5px solid var(--yellow)' : isClaimed ? '1.5px solid #4CAF50' : '1.5px solid rgba(255,255,255,0.06)',
+                      background: isCurrent ? 'rgba(232, 87, 109, 0.15)' : isClaimed ? 'rgba(76, 175, 80, 0.08)' : 'rgba(255,255,255,0.03)',
+                      border: isCurrent ? '1.5px solid var(--pink)' : isClaimed ? '1.5px solid #4CAF50' : '1.5px solid rgba(255,255,255,0.06)',
                       borderRadius: 6,
                       padding: '8px 2px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       position: 'relative',
-                      boxShadow: isCurrent ? '0 0 10px rgba(245, 200, 66, 0.25)' : 'none'
+                      boxShadow: 'none'
                     }}
                   >
-                    <span style={{ fontSize: '0.55rem', color: isCurrent ? 'var(--yellow)' : isClaimed ? '#4CAF50' : 'rgba(255,255,255,0.3)', fontWeight: 700 }}>D{dayNum}</span>
+                    <span style={{ fontSize: '0.55rem', color: isCurrent ? 'var(--pink)' : isClaimed ? '#4CAF50' : 'rgba(255,255,255,0.3)', fontWeight: 700 }}>D{dayNum}</span>
                     <span style={{ fontSize: '0.85rem', margin: '4px 0 2px' }}>{isClaimed ? '✅' : '🪙'}</span>
                     <span style={{ fontSize: '0.48rem', color: 'rgba(255,255,255,0.5)' }}>+{pts}</span>
                   </div>
@@ -248,7 +248,7 @@ export function ToastProvider({ children }) {
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '12px 16px', marginBottom: 22, border: '1px solid rgba(255,255,255,0.04)' }}>
-              <div style={{ color: 'var(--yellow)', fontWeight: 800, fontSize: '1rem', fontFamily: 'Bungee' }}>
+              <div style={{ color: 'var(--pink)', fontWeight: 800, fontSize: '1rem', fontFamily: 'Bungee' }}>
                 +{streakClaim.points} POINTS EARNED!
               </div>
               <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem', marginTop: 4 }}>
